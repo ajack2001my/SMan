@@ -1,0 +1,135 @@
+TARGET		Sman.App
+TARGETTYPE	app
+TARGETPATH	\system\Apps\SMan
+UID		0x100039CE 0x101FB40F
+
+USERINCLUDE	\P800Dev\sman \P800Dev\sman\Ecom\interface
+SYSTEMINCLUDE	\epoc32\include
+
+SOURCEPATH	\P800Dev\sman
+SOURCE		sman.cpp dialogs.cpp fileman.cpp fc_bjackview.cpp
+SOURCE		tasklistview.cpp filelistview.cpp marquee.cpp
+SOURCE		refreshtasklist.cpp bjackview.cpp dbview.cpp
+SOURCE		sysinfoview.cpp viewbase.cpp agendaview.cpp
+SOURCE		dtmfview.cpp hexeditview.cpp findfileview.cpp
+SOURCE		cellareaview.cpp fc_cellareaview.cpp dbhelper.cpp
+SOURCE		textutils.cpp fileutils.cpp
+RESOURCE	sman.rss
+
+LIBRARY		sdpdatabase.LIB WS32.LIB commdb.lib
+LIBRARY		qbtsharedui.lib efsrv.lib gdi.lib
+LIBRARY		cone.lib eikdlg.lib irobex.lib bluetooth.lib
+LIBRARY		esock.lib EUSER.LIB EIKCORE.LIB btdevice.lib
+LIBRARY		EIKCOCTL.LIB EIKCTL.LIB hal.lib bafl.lib
+LIBRARY		sdpagent.LIB apparc.lib apgrfx.lib egul.lib
+LIBRARY		qikctl.lib qikutils.lib qikdlg.lib
+LIBRARY		MediaClientAudio.lib irda.lib etext.lib send.lib
+LIBRARY		fbscli.lib apmime.lib estor.lib edbms.lib
+LIBRARY		plpvariant.lib eikcdlg.lib agnmodel.lib
+LIBRARY		cntmodel.lib form.lib etel.lib etelmm.lib
+LIBRARY		ecom.lib eikfile.lib ezip.lib ezlib.lib 
+
+//LIBRARY		msgs.lib smcm.lib gsmu.lib
+
+START BITMAP	sman.mbm 
+HEADER
+SOURCEPATH	mbm
+SOURCE		c12 compress.bmp
+SOURCE		1 compressmask.bmp
+SOURCE		c12 endtask.bmp
+SOURCE		1 endtaskmask.bmp
+SOURCE		c12 flushout.bmp
+SOURCE		1 flushoutmask.bmp
+SOURCE		c12 refresh.bmp
+SOURCE		1 refreshmask.bmp
+SOURCE		c12 snapshot.bmp
+SOURCE		1 snapshotmask.bmp
+SOURCE		c12 all.bmp
+SOURCE		1 allmask.bmp
+SOURCE		c12 none.bmp
+SOURCE		1 nonemask.bmp
+SOURCE		c12 newfolder.bmp
+SOURCE		1 newfoldermask.bmp
+SOURCE		c12 reload.bmp
+SOURCE		1 reloadmask.bmp
+SOURCE		c12 bjackindividual.bmp
+SOURCE		c12 bjackproximity.bmp
+SOURCE		c12 bjackframe1.bmp
+SOURCE		c12 bjackframe2.bmp
+SOURCE		c12 bjackstop.bmp
+SOURCE		1 bjackstopmask.bmp
+SOURCE          c12 todayviewclosed.bmp
+SOURCE          1 todayviewclosedmask.bmp
+SOURCE          c12 todayviewopen.bmp
+SOURCE          1 todayviewopenmask.bmp
+SOURCE          c12 todayviewwarp.bmp
+SOURCE          1 todayviewwarpmask.bmp
+SOURCE		c12 blank.bmp
+SOURCE		c12 dial.bmp
+SOURCE		1 dialmask.bmp
+SOURCE		c12 hexeditprevpage.bmp
+SOURCE		1 hexeditprevpagemask.bmp
+SOURCE		c12 hexeditnextpage.bmp
+SOURCE		1 hexeditnextpagemask.bmp
+SOURCE		c12 hexeditendpage.bmp
+SOURCE 		1 hexeditendpagemask.bmp
+SOURCE		c12 hexeditbeginpage.bmp
+SOURCE		1 hexeditbeginpagemask.bmp
+SOURCE		c12 hexeditgoto.bmp
+SOURCE		1 hexeditgotomask.bmp
+SOURCE		c12 linecursor.bmp
+SOURCE		c12 findfile.bmp
+SOURCE		1 findfile.bmp
+SOURCE		c12 findfilestart.bmp
+SOURCE		1 findfilestartmask.bmp
+SOURCE		c12 findfilestop.bmp
+SOURCE		1 findfilestopmask.bmp
+SOURCE		c12 findfilecriteria.bmp
+SOURCE		1 findfilecriteriamask.bmp
+SOURCE		c12 celleditcheck.bmp
+SOURCE		1 celleditcheckmask.bmp
+SOURCE		c12 celleditcross.bmp
+SOURCE		1 celleditcrossmask.bmp
+SOURCE		c12 downarrow.bmp
+SOURCE		1 downarrowmask.bmp
+SOURCE		c12 uparrow.bmp
+SOURCE		1 uparrowmask.bmp
+SOURCE		c12 eventaudio.bmp
+SOURCE		1 eventaudiomask.bmp
+SOURCE		c12 eventvibrate.bmp
+SOURCE		1 eventvibratemask.bmp
+SOURCE		c12 eventunknown.bmp
+SOURCE		1 eventunknownmask.bmp
+SOURCE		c12 evententer.bmp
+SOURCE		1 evententermask.bmp
+SOURCE		c12 eventleave.bmp
+SOURCE		1 eventleavemask.bmp
+SOURCE		c12 evententerleave.bmp
+SOURCE		1 evententerleavemask.bmp
+SOURCE		c12 dobutton.bmp
+SOURCE		1 dobuttonmask.bmp
+SOURCE		c12 cellareaframe1.bmp
+SOURCE		c12 cellareaframe2.bmp
+SOURCE		c12 agendadone.bmp
+SOURCE		1 agendadonemask.bmp
+SOURCE		c12 agendanotdone.bmp
+SOURCE		1 agendanotdonemask.bmp
+SOURCE		c12 celleditdelete.bmp
+SOURCE		1 celleditdeletemask.bmp
+SOURCE		c12 celleditedit.bmp
+SOURCE		1 cellediteditmask.bmp
+SOURCE		c12 celleditexport.bmp
+SOURCE		1 celleditexportmask.bmp
+SOURCE		c12 celleditimport.bmp
+SOURCE		1 celleditimportmask.bmp
+SOURCE		c12 celleditmove.bmp
+SOURCE		1 celleditmovemask.bmp
+SOURCE		c12 celleditnew.bmp
+SOURCE		1 celleditnewmask.bmp
+SOURCE		c12 file.bmp
+SOURCE		1 filemask.bmp
+SOURCE		c12 folder.bmp
+SOURCE		1 foldermask.bmp
+SOURCE		c12 drive.bmp
+SOURCE		1 drivemask.bmp
+END

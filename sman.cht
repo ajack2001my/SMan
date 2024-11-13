@@ -1,0 +1,3363 @@
+#include <eikon.rh>
+#include <uikon.hrh>
+#include <eikon.rsg>
+#include <qikon.rh>
+#include "sman.hrh"
+#include <quartz.mbg>
+
+//#define __DEBUG_BUILD__
+
+NAME sman
+
+CHARACTER_SET UTF8
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf=""; }
+
+RESOURCE EIK_APP_INFO
+{
+	menubar=r_memory_menubar;
+}
+
+RESOURCE MENU_PANE r_options_autostart_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdAutostartSMan; txt="SMan"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdAutostartOthers; txt="其它程式"; flags = EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdAutostartActive; txt="啟用"; }
+	};
+}
+
+RESOURCE MENU_PANE r_options_bluejack_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdNoDevicePause; txt="設定計時"; },
+		MENU_ITEM { command=cmdLogFlags; txt="設定掃描記錄"; },
+		MENU_ITEM { command=cmdBluejackSysMsg; txt="設定通知方式";},
+		MENU_ITEM { command=cmdBluejackMsg; txt="設定發送訊息"; },
+		MENU_ITEM { command=cmdBluejackExcludeList; txt="設定忽略清單"; flags=EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdResolveName; txt="反解名稱"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdBluejackOnce; txt="只掃描一次"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdBluejackAutoSave; txt="記錄至磁碟"; flags=EEikMenuItemCheckBox | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdZoom; txt = "縮放"; }
+	};
+}
+
+RESOURCE MENU_PANE r_runapplist_menu
+{
+	items=
+	{
+	};
+}
+	
+RESOURCE MENU_PANE r_shortcuts_menu
+{
+	items=
+	{
+		MENU_ITEM { cascade=r_runapplist_menu; txt="執行"; },
+		MENU_ITEM { command=cmdShortcuts; txt="設定開始捷徑";  flags = EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdShort1; txt="<未指定>"; flags = EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdShort2; txt="<未指定>"; flags = EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdShort3; txt="<未指定>"; flags = EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdShort4; txt="<未指定>"; flags = EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdShort5; txt="<未指定>"; flags = EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdShort6; txt="<未指定>"; flags = EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdShort7; txt="<未指定>"; flags = EEikMenuItemDimmed; }
+	};
+}	
+
+RESOURCE ARRAY r_fn_array
+{
+	items=
+	{	
+		LBUF { txt="工作管理員"; },
+		LBUF { txt="檔案管理員"; },
+		LBUF { txt="Bluejack"; },
+		LBUF { txt="資料管理員"; },
+		LBUF { txt="系統資訊"; },
+		LBUF { txt="今日行程"; },
+		LBUF { txt="DTMF 撥號器"; },
+		LBUF { txt="網路資訊"; }
+	};	
+}
+
+RESOURCE DIALOG r_dialog_fn_options
+{
+	title = "模組設定";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "使用模組：";
+			type = EEikCtListBox;
+			id = cFnModuleList;
+			control = LISTBOX
+			{
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				array_id = r_fn_array;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "開始模組：";
+			id = cFnStartupView;
+			control = CHOICELIST { array_id = r_fn_array; };
+		}
+	};
+}	
+
+RESOURCE MENU_PANE r_modules_menu
+{
+	items =
+	{
+		MENU_ITEM { command=cmdSwitchMemory; txt="工作管理員"; },
+		MENU_ITEM { command=cmdSwitchFile; txt="檔案管理員"; },
+		MENU_ITEM { command=cmdSwitchSysInfo; txt="系統資訊"; },
+		MENU_ITEM { command=cmdSwitchBJack; txt="Bluejack"; },
+		MENU_ITEM { command=cmdSwitchDB; txt="資料管理員"; },
+		MENU_ITEM { command=cmdSwitchAgenda; txt="今日行程"; },
+		MENU_ITEM { command=cmdSwitchDTMFDialer; txt="DTMF 撥號器"; },
+		MENU_ITEM { command=cmdSwitchCellArea; txt="網路資訊"; }
+	};
+}
+	
+RESOURCE MENU_PANE r_generic_fn
+{
+	items =
+	{
+	   	MENU_ITEM { cascade=r_shortcuts_menu; txt="開始"; },
+	   	MENU_ITEM { cascade=r_modules_menu; txt="模組"; },
+		MENU_ITEM { cascade=r_fn_utilities_menu; txt="工具"; },
+		MENU_ITEM { cascade=r_controlpanel_menu; txt="控制台"; flags=EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { cascade=r_fn_options_menu; txt="設定"; },
+		MENU_ITEM { command=cmdAbout; txt="關於"; },
+		MENU_ITEM { command=cmdQuit; txt="離開"; }
+	};
+}
+
+RESOURCE MENU_PANE r_fn_options_menu
+{
+	items = 
+	{
+		MENU_ITEM { command=cmdSwitchOptions; txt="設定模組"; flags=EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdHotkey; txt="熱鍵"; },
+		MENU_ITEM { command=cmdNoHotkey; txt="停用熱鍵"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdPersist; txt="略過 \"harakiri\""; flags=EEikMenuItemCheckBox; }
+	};
+}
+
+RESOURCE MENU_PANE r_sysinfo_options
+{
+	items=
+	{
+		MENU_ITEM { command=cmdSysInfoRefresh; txt="重新整理"; },
+		MENU_ITEM { command=cmdZoom; txt="縮放"; }
+	};
+}
+
+RESOURCE MENU_PANE r_controlpanel_menu
+{
+	items =
+	{
+		MENU_ITEM { command=cmdCPBluetooth; txt="藍芽"; },
+		MENU_ITEM { command=cmdCPIrda; txt="紅外線"; },
+		MENU_ITEM { command=cmdCPPhone; txt="電話"; },
+		MENU_ITEM { command=cmdControlPanel; txt="其它"; }
+	};
+}
+
+RESOURCE MENU_PANE r_bluejacklog_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdBluejackClearLog; txt="清除暫存記錄"; },
+		MENU_ITEM { cascade=r_bluejack_filelog_menu; txt="檔案記錄"; }
+	};
+}
+
+RESOURCE MENU_PANE r_bluejack_filelog_menu
+{
+	items =
+	{
+		MENU_ITEM { command=cmdBluejackViewFileLog; txt="觀看"; },
+		MENU_ITEM { command=cmdBluejackDelFileLog; txt="刪除"; }
+	};
+}
+
+
+RESOURCE MENU_PANE r_extras_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdFlipFlush; txt="關蓋沖洗"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdForceEndTask; txt="強迫中止程式"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdFlushExclude; txt = "略過沖洗"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdShowHiddenTask; txt="顯示隱藏程式"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdZoom; txt = "縮放"; }
+	};
+}
+
+RESOURCE MENU_BAR r_db_menubar
+{
+	titles=
+   	{
+		MENU_TITLE { menu_pane=r_db_options; txt="資料管理員"; },
+		MENU_TITLE { menu_pane=r_edit; txt="編輯"; },
+		MENU_TITLE { menu_pane=r_db_data; txt="資料"; },
+		MENU_TITLE { menu_pane=r_generic_fn; txt="功能"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE MENU_BAR r_sysinfo_menubar
+{
+	titles=
+   	{
+		MENU_TITLE { menu_pane=r_sysinfo_options; txt="系統資訊"; },
+		MENU_TITLE { menu_pane=r_generic_fn; txt="功能"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE MENU_PANE r_edit
+{
+	items=
+	{
+		MENU_ITEM { command=cmdEditCut; txt="剪下"; flags=EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdEditCopy; txt="複製"; flags=EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdEditPaste; txt="貼上"; flags=EEikMenuItemDimmed; }
+	};
+}
+
+RESOURCE MENU_PANE r_db_options
+{
+	items=
+	{
+		MENU_ITEM { command=cmdDBReadDB; txt="開啟資料庫"; },
+		MENU_ITEM { command=cmdDBCloseDB; txt="關閉資料庫"; flags=EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdDBChangePassword; txt="更改密碼"; },
+		MENU_ITEM { command=cmdDBReInit; txt="重新建立資料庫"; },
+		MENU_ITEM { command=cmdDBUpdateStats; txt="更新統計資料"; },
+		MENU_ITEM { command=cmdDBCompact; txt="壓縮"; flags=EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdDBSortAsc; txt = "升序排列"; flags = EEikMenuItemRadioStart; },
+		MENU_ITEM { command=cmdDBSortDes; txt = "降序排列"; flags = EEikMenuItemRadioEnd | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdZoom; txt="縮放"; }
+	};
+}
+
+RESOURCE MENU_PANE r_db_data
+{
+	items=
+	{
+		MENU_ITEM { command=cmdDBExportDB; txt="匯出資料庫"; },
+		MENU_ITEM { command=cmdDBImportDB; txt="匯入資料庫"; }
+	};
+}
+
+RESOURCE MENU_PANE r_fc_bluejack_menu
+{
+	items=
+	{
+		MENU_ITEM { cascade=r_fc_moduleswitch_menu; command=cmdFCSwitchMenu; txt="模組"; },
+		MENU_ITEM { command=cmdFlushOut; txt="沖洗程式"; },
+		MENU_ITEM { command=cmdUtilsFixApplist; txt="修正程式列表";  flags=EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdBluejack; txt="開始區域掃描"; },
+		MENU_ITEM { command=cmdBluejackClearLog; txt="清除暫存記錄"; }
+	};	
+}
+
+RESOURCE MENU_BAR r_bluejack_menubar
+{
+	titles=
+   	{
+	   	MENU_TITLE { menu_pane=r_options_bluejack_menu; txt="Bluejack"; },
+	   	MENU_TITLE { menu_pane=r_bluejacklog_menu; txt="記錄"; },
+		MENU_TITLE { menu_pane=r_generic_fn; txt="功能"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE MENU_BAR r_memory_menubar
+{
+	titles=
+   	{
+	   	MENU_TITLE { menu_pane=r_extras_menu; txt="工作管理員"; },
+		MENU_TITLE { menu_pane=r_generic_fn; txt="功能"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_autostart
+{
+	title = "自動啟動設定";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "程式 1：";
+			id = cAutoStart1;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "程式 2：";
+			id = cAutoStart2;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "程式 3：";
+			id = cAutoStart3;
+			control = CHOICELIST { };
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_nodevicepause
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "預設"; }; },
+		DLG_BUTTON { id = EEikBidCancel; button = CMBUT { txt = "取消"; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "確定"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_loglevels
+{
+	title = "掃描記錄設定";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait | EEikDialogFlagButtonsRight;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "記錄 Bluejack：";
+			id = cLogBluejack;
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "記錄 OBEX：";
+			id = cLogOBEX;
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "記錄掃描：";
+			id = cLogScanning;
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "記錄 Decay：";
+			id = cLogDecays;
+		}
+	};
+}
+
+RESOURCE ARRAY r_array_audionotify
+{
+	items=
+	{	
+		LBUF { txt="<取消>"; },
+		LBUF { txt="尋找音樂"; }
+	};	
+}
+
+RESOURCE DIALOG r_dialog_notification
+{
+	title = "訊息通知";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "顯示通知訊息：";
+			id = cSystemMsgNotify;
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "振動提示：";
+			id = cVibraNotify;
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "播放音效：";
+			id = cAudioFileName;
+			control = CHOICELIST { };
+		}			
+	};
+}
+
+RESOURCE DIALOG r_dialog_nodevicepause
+{
+	title = "計時設定";
+	buttons = r_buttons_nodevicepause;
+	flags = EEikDialogFlagWait;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "OBEX 暫停 (秒)：";
+			id = cOBEXTimeout;
+			control = QIK_NUMBER_EDITOR { min = 10; max = 30; };
+		},
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "Decay (秒)：";
+			id = cDecayTime;
+			control = QIK_NUMBER_EDITOR { min = 5; max = 1800; };
+		},
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "休眠 (秒)：";
+			id = cNoDevicePause;
+			control = QIK_NUMBER_EDITOR { min = 1; max = 1800; };
+		},
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "失敗重試：";
+			id = cNoDeviceAttempts;
+			control = QIK_NUMBER_EDITOR { min = 1; max = 10; };
+		}			
+	};
+}
+			
+RESOURCE DIALOG r_dialog_shortcut
+{
+	title = "開始";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait | EEikDialogFlagButtonsRight;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "1：";
+			id = cShortcut1;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "2：";
+			id = cShortcut2;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "3：";
+			id = cShortcut3;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "4：";
+			id = cShortcut4;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "5：";
+			id = cShortcut5;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "6：";
+			id = cShortcut6;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "7：";
+			id = cShortcut7;
+			control = CHOICELIST { };
+		}
+	};
+}
+
+RESOURCE ARRAY r_hotkey_array_p800_p900
+{
+	items=
+	{	
+		LBUF { txt="<取消>"; },
+		LBUF { txt="相機鍵"; },
+		LBUF { txt="網路鍵"; },
+		LBUF { txt="開蓋"; }
+	};	
+}
+
+RESOURCE ARRAY r_hotkey_array_a920_a925
+{
+	items=
+	{	
+		LBUF { txt="<取消>"; },
+		LBUF { txt="捷徑"; },
+		LBUF { txt="網路鍵"; },
+		LBUF { txt="<未使用>"; }
+	};	
+}
+
+// The number after the semi-colon is the shortcut number that is stored in sman's config file
+// By doing it this way, we can insert any arbitrary item in the middle and have it sorted in
+// alphabetical order for the user to easily locate whatever he / she wants and still not worry
+// about the value stored in the config file being wrong
+RESOURCE ARRAY r_hotkey_choices_fo
+{
+	items =
+	{
+		LBUF { txt = "<取消>;0"; },
+		LBUF { txt = "自動啟動 -- 其它;1"; },
+		LBUF { txt = "自動啟動 -- SMan 開關;2"; },
+		LBUF { txt = "自動啟動 -- 開關;3"; },
+		LBUF { txt = "控制台 -- 藍芽;4"; },
+		LBUF { txt = "控制台 -- 紅外線;5"; },
+		LBUF { txt = "控制台 -- 控制台;6"; },
+		LBUF { txt = "控制台 -- 電話;7"; },
+		LBUF { txt = "其它 -- 沖洗程式;8"; },
+		LBUF { txt = "其它 -- 展開選單;9"; },
+		LBUF { txt = "工具 -- 壓縮通訊錄;10"; },
+		LBUF { txt = "工具 -- 修正程式列表;11"; },
+		LBUF { txt = "工具 -- 修正同步時區;12"; },
+		LBUF { txt = "工具 -- 設定系統字型;13"; },
+		LBUF { txt = "模組 -- Bluejack;14"; },
+		LBUF { txt = "模組 -- DTMF 撥號器;15"; },
+		LBUF { txt = "模組 -- 檔案管理員;16"; },
+		LBUF { txt = "模組 -- 資料管理員;17"; },
+		LBUF { txt = "模組 -- 網路資訊;18"; },
+		LBUF { txt = "模組 -- 系統資訊;19"; },
+		LBUF { txt = "模組 -- 工作管理員;20"; },
+		LBUF { txt = "模組 -- 今日行程;21"; }
+	};
+}
+
+// Note: These numbers MUST match the flip open counterpart. Only if there is specific 
+// functionality to either FO or FC mode will there be differences; in that event, the numbers
+// MUST be UNIQUE across the FO + FC modes
+RESOURCE ARRAY r_hotkey_choices_fc
+{
+	items =
+	{
+		LBUF { txt = "<取消>;0"; },
+		LBUF { txt = "自動啟動 -- SMan 開關;2"; },
+		LBUF { txt = "自動啟動 -- 開關;3"; },
+		LBUF { txt = "其它 -- 沖洗程序;8"; },
+		LBUF { txt = "其它 -- 導航;9"; },
+		LBUF { txt = "工具 -- 壓縮通訊錄;10"; },
+		LBUF { txt = "工具 -- 修正程式列表;11"; },
+		LBUF { txt = "模組 -- Bluejack;14"; },
+		LBUF { txt = "模組 -- 網路資訊;18"; }
+	};
+}
+
+RESOURCE ARRAY r_dialog_hotkey_pages_key
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "熱鍵：";
+			id = cHotkeyControl;
+			control = CHOICELIST 
+			{
+				array_id = r_hotkey_array_p800_p900;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_hotkey_pages_fo
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "前景 (短按)：";
+			id = cHotkeyInFocusShortFO;
+			control = CHOICELIST {};
+		},		
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "前景 (長按)：";
+			id = cHotkeyInFocusLongFO;
+			control = CHOICELIST {};
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "背景 (短按)：";
+			id = cHotkeyExFocusShortFO;
+			control = CHOICELIST {};
+		},		
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "背景 (長按)：";
+			id = cHotkeyExFocusLongFO;
+			control = CHOICELIST {};
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_hotkey_pages_fc
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "前景 (短按)：";
+			id = cHotkeyInFocusShortFC;
+			control = CHOICELIST {};
+		},		
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "前景 (長按)：";
+			id = cHotkeyInFocusLongFC;
+			control = CHOICELIST {};
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "背景 (短按)：";
+			id = cHotkeyExFocusShortFC;
+			control = CHOICELIST {};
+		},		
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "背景 (長按)：";
+			id = cHotkeyExFocusLongFC;
+			control = CHOICELIST {};
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_hotkey_pages
+{
+	items = 
+	{	
+		PAGE
+		{
+			id = idHotkeyPage_Hotkey;
+			text = "熱鍵";
+			lines = r_dialog_hotkey_pages_key;
+		},
+		PAGE
+		{
+			id = idHotkeyPage_FO;
+			text = "開蓋";
+			lines = r_dialog_hotkey_pages_fo;
+		},
+		PAGE
+		{
+			id = idHotkeyPage_FC;
+			text = "關蓋";
+			lines = r_dialog_hotkey_pages_fc;
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_hotkey
+{
+	title = "熱鍵設定";
+	flags = EEikDialogFlagWait;
+	pages = r_dialog_hotkey_pages;
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+}
+
+RESOURCE DLG_BUTTONS r_buttons_continue_credits
+{
+	buttons =
+	{
+		#ifdef __DEBUG_BUILD__
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "除錯"; }; },
+		#endif
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "感謝"; }; },
+		DLG_BUTTON { id = EEikBidCancel; button = CMBUT { txt = "繼續"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_about
+{
+	title = "About";
+	buttons = r_buttons_continue_credits;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtLabel;
+			control = LABEL 
+			{
+				txt="The S Manager (c) 2003,2004";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtLabel;
+			control = LABEL 
+			{
+				txt="v1.3c, Build 202";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtLabel;
+			control = LABEL 
+			{
+				txt="程式製作：Yip Je Sum / droll";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtLabel;
+			control = LABEL 
+			{
+				txt="程式設計：Adrian Chiang / ajack";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtLabel;
+			control = LABEL 
+			{
+				txt="http://renegade.w3xs.com";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_snapshotconfirm
+{
+	title = "記錄快照";
+	buttons = R_EIK_BUTTONS_NO_YES;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtLabel;
+			control = LABEL
+			{
+				txt = "您確定要記錄快照?";
+			};
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_bluebeamlog
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "取消"; }; },
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "確定"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_bluebeamlog
+{
+	title = "檔案傳送記錄";
+	buttons = r_buttons_bluebeamlog;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikCtRichTextEditor;
+			id = cBluebeamLog;
+			control = RTXTED 
+			{ 
+				width = 150; height = 170; numlines = 10; flags = EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinJustAutoCurEnd | EEikEdwinDisplayOnly;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_bluejacklog
+{
+	title = "Bluejack 記錄";
+	buttons = R_EIK_BUTTONS_OK;
+	flags=EEikDialogFlagWait;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikCtRichTextEditor;
+			id = cBluejackLog;
+			control = RTXTED 
+			{ 
+				width = 150; height = 170; numlines = 10; flags = EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinJustAutoCurEnd | EEikEdwinDisplayOnly;
+			};
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_filemanprogress
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidOverwrite; button = CMBUT { txt = "覆蓋"; }; },
+		DLG_BUTTON { id = EEikBidOverwriteAll; button = CMBUT { txt = "全部覆蓋"; }; },
+		DLG_BUTTON { id = EEikBidSkip; button = CMBUT { txt = "忽略"; }; flags=EEikLabeledButtonIsDefault; },
+		DLG_BUTTON { id = EEikBidSkipAll; button = CMBUT { txt = "全部忽略"; }; },
+		DLG_BUTTON { id = EEikBidAbort; button = CMBUT { txt = "中止"; }; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_filemanprogress_nowait
+{
+	title = "檔案管理員";
+	buttons = r_buttons_filemanprogress;
+	flags = EEikDialogFlagNoDrag;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikCtRichTextEditor;
+			id = cFileManProgressText;
+			control = RTXTED 
+			{ 
+				width = 150; height = 100; numlines = 10; flags = EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinJustAutoCurEnd | EEikEdwinDisplayOnly;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "目前 ";
+			type = EEikCtProgInfo;
+			id = cFileManProgressBar;
+			control = PROGRESSINFO
+			{
+				text_type = EEikProgressTextPercentage;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_filemanprogress_wait
+{
+	title = "檔案管理員";
+	buttons = r_buttons_filemanprogress;
+	flags = EEikDialogFlagWait | EEikDialogFlagNoDrag;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtRichTextEditor;
+			id = cFileManProgressText;
+			control = RTXTED 
+			{ 
+				width = 150; height = 100; numlines = 10; flags = EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinJustAutoCurEnd | EEikEdwinDisplayOnly;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "目前 ";
+			type = EEikCtProgInfo;
+			id = cFileManProgressBar;
+			control = PROGRESSINFO
+			{
+				text_type = EEikProgressTextPercentage;
+			};
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_filemanrename
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidAbort; button = CMBUT { txt = "取消"; }; },
+		DLG_BUTTON { id = EEikBidSkip; button = CMBUT { txt = "忽略"; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "確定"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_filemanrename
+{
+	title = "更改名稱";
+	buttons = r_buttons_filemanrename;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cFileManNewName;
+			control = GTXTED 
+			{ 
+				height = 22; width = 21; numlines = 1; flags = EEikEdwinJustAutoCurEnd; textlimit = 256;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_filemannewfolder
+{
+	title = "新增資料夾";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cFileManNewName;
+			control = GTXTED 
+			{ 
+				height = 22; width = 21; numlines = 1; flags = EEikEdwinJustAutoCurEnd;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_bluejack_vcard
+{
+	title = "Bluejack 訊息";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cBluejackMessage;
+			control = GTXTED 
+			{ 
+				textlimit = 20; height = 22; width = 21; numlines = 1; flags = EEikEdwinJustAutoCurEnd;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_filemanatt
+{
+	title = "檔案屬性";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cFileAttName;
+			control = GTXTED 
+			{ 
+				height = 70; width = 150; numlines = 10; flags = EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinDisplayOnly;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "唯讀：";
+			id = cFileAttReadOnly;
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "文件：";
+			id = cFileAttArchive;
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "系統：";
+			id = cFileAttSystem;
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "隱藏：";
+			id = cFileAttHidden;
+		},
+/*		
+		DLG_LINE
+		{
+			type = EQikCtDateEditor;
+			prompt = "日期：";
+			id = cFileModifiedDateTime;
+			control = QIK_DATE_EDITOR
+			{
+				minDate = DATE
+				{
+					day = 0;
+					month = 0;
+					year = 1900;
+				};
+				maxDate = DATE
+				{
+					day = 30;
+					month = 11;
+					year = 2999;
+				};
+			};
+		}
+*/		
+		DLG_LINE
+		{
+			type = EQikCtTimeAndDateEditor;
+			prompt = "修改日期：";
+			id = cFileModifiedDateTime;
+			control = QIK_TIME_AND_DATE_EDITOR
+			{
+				minTimeAndDate = TIME_AND_DATE
+				{
+					minute = 0;
+					hour = 0;
+					day = 0;
+					month = 0;
+					year = 1900;
+				};
+				maxTimeAndDate = TIME_AND_DATE
+				{
+					minute = 59;
+					hour = 23;
+					day = 30;
+					month = 11;
+					year = 2999;
+				};
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_fileman_crc
+{
+	title = "計算 CRC";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	items=
+	{
+		DLG_LINE
+		{
+			prompt = "檔案：";
+			type = EEikCtLabel;
+			id = cCRCFileName;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "CRC：";
+			type = EEikCtLabel;
+			id = cCRCValue;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "進度：";
+			type = EEikCtProgInfo;
+			id = cCRCProgress;
+			control = PROGRESSINFO
+			{
+				text_type = EEikProgressTextPercentage;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_db_getpassword
+{
+	title = "要求認証";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtSecretEd;
+			prompt = "密碼：";
+			id = cDBPassword;
+			control = SECRETED
+			{
+				num_letters = 16;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_db_changepassword
+{
+	title = "更改密碼";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtSecretEd;
+			prompt = "輸入密碼：";
+			id = cDBPassword;
+			control = SECRETED
+			{
+				num_letters = 16;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtSecretEd;
+			prompt = "再次輸入密碼：";
+			id = cDBPasswordReEnter;
+			control = SECRETED
+			{
+				num_letters = 16;
+			};
+		}		
+	};
+}
+
+RESOURCE DIALOG r_dialog_db_compress
+{
+	title = "請稍候";
+	items=
+	{
+		DLG_LINE
+		{
+			prompt = "進度：";
+			type = EEikCtProgInfo;
+			id = cDBCompactProgress;
+			control = PROGRESSINFO
+			{
+				text_type = EEikProgressTextPercentage;
+			};
+		}
+	};
+}
+
+RESOURCE MENU_BAR r_file_menubar
+{
+	titles=
+   	{
+	   	MENU_TITLE { menu_pane = r_file_options_menu; txt="檔案管理員";},
+	   	MENU_TITLE { menu_pane = r_file_drives_menu; txt="磁碟";},
+		MENU_TITLE { menu_pane = r_generic_fn; txt="功能"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE MENU_PANE r_file_options_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdFileMan_Bluetooth; txt="以藍芽傳送"; flags=EEikMenuItemRadioStart; },
+		MENU_ITEM { command=cmdFileMan_IrDA; txt="以紅外線傳送"; flags=EEikMenuItemRadioEnd | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { cascade=r_file_sort_menu; txt="排序"; },
+		MENU_ITEM { command=cmdFileManToggleHiddenView; txt="顯示隱藏檔案和資料夾"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdFileManToggleRunApp; txt="自動執行程式"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdFileManToggleOpenFile; txt="自動開啟檔案"; flags=EEikMenuItemCheckBox | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdZoom; txt="縮放"; }
+	};
+}
+
+RESOURCE MENU_PANE r_file_sort_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdFileMan_SortName; txt="依檔名排序"; flags=EEikMenuItemRadioStart; },
+		MENU_ITEM { command=cmdFileMan_SortDate; txt="依日期排序"; flags=EEikMenuItemRadioMiddle; },
+		MENU_ITEM { command=cmdFileMan_SortSize; txt="依大小排序"; flags=EEikMenuItemRadioEnd | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdFileMan_SortAsc; txt="依升序排列"; flags=EEikMenuItemRadioStart; },
+		MENU_ITEM { command=cmdFileMan_SortDesc; txt="依降序排列"; flags=EEikMenuItemRadioEnd; }
+	};
+}
+
+RESOURCE MENU_PANE r_file_drives_menu
+{
+	items=
+	{
+	};
+}
+
+RESOURCE MENU_PANE r_fileman_dobutton
+{
+	items=
+	{
+		MENU_ITEM { command=cmdFileManBeam; txt="傳送"; },
+		MENU_ITEM { command=cmdFileManCut; txt="剪下"; },
+		MENU_ITEM { command=cmdFileManCopy; txt="複製"; },
+		MENU_ITEM { command=cmdFileManPaste; txt="貼上"; },
+		MENU_ITEM { command=cmdFileManRename; txt="更改名稱"; },
+		MENU_ITEM { command=cmdFileManDelete; txt="刪除"; flags = EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdFileManCRC; txt="計算 CRC"; },
+		MENU_ITEM { command=cmdFileManProperties; txt="內容"; },
+		MENU_ITEM { command=cmdFileManOpenOverride; txt="開啟"; },
+		MENU_ITEM { command=cmdFileManCopyAs; txt="建立複製"; },
+		MENU_ITEM { command=cmdFileManHexEdit; txt="HEX 編輯"; }
+	};
+}
+
+RESOURCE MENU_PANE r_db_dobutton
+{
+	items=
+	{
+		MENU_ITEM { command=cmdDBDel; txt="刪除"; flags = EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdDBAdd; txt="新增"; },
+		MENU_ITEM { command=cmdDBEdit; txt="編輯"; },
+		MENU_ITEM { command=cmdDBView; txt="觀看"; },
+		MENU_ITEM { command=cmdDBSave; txt="儲存"; }	
+	};
+}
+
+RESOURCE QIK_TOOLBAR r_toolbar_db_list
+{
+	height = EQikToolbarHeight - 4;
+	controls = 
+	{
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdDBDo;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderDobutton;
+			bmpmask = EMbmMyHeaderDobuttonmask;
+			alignment = EQikToolbarRight;
+		}
+	};
+}
+
+RESOURCE QIK_TOOLBAR r_toolbar_db_single
+{
+	height = EQikToolbarHeight - 4;
+	controls = 
+	{
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdDBBack;
+			bmpfile = "Z:\\SYSTEM\\DATA\\QUARTZ.MBM";
+			bmpid = EMbmQuartzBackarrow;
+			bmpmask = EMbmQuartzBackarrowmask;
+		},		
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdDBDo;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderDobutton;
+			bmpmask = EMbmMyHeaderDobuttonmask;
+			alignment = EQikToolbarRight;
+		}
+	};
+}
+
+RESOURCE QIK_TOOLBAR r_toolbar_bluejack
+{
+	controls = 
+	{
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdBluejack;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderBjackproximity;
+			bmpmask = EMbmMyheaderBjackproximity;
+		},
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdBluejackOne;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderBjackindividual;
+			bmpmask = EMbmMyheaderBjackindividual;
+		},
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdBluejackStop;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderBjackstop;
+			bmpmask = EMbmMyheaderBjackstopmask;
+		}
+	};
+}
+
+RESOURCE QIK_TOOLBAR r_toolbar_fileman
+{
+	height = EQikToolbarHeight - 4;
+	controls = 
+	{
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdFileManAll;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderAll;
+			bmpmask = EMbmMyheaderAllmask;
+		},
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdFileManNone;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderNone;
+			bmpmask = EMbmMyheaderNonemask;
+		},
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdFileManNewFolder;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderNewfolder;
+			bmpmask = EMbmMyheaderNewfoldermask;
+		},
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdFileManReload;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderReload;
+			bmpmask = EMbmMyheaderReloadmask;
+		},
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdFileManFindFile;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderFindfile;
+			bmpmask = EMbmMyheaderFindfilemask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdDoButton;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderDobutton;
+			bmpmask = EMbmMyHeaderDobuttonmask;
+			alignment = EQikToolbarRight;
+		}
+	};
+}
+
+RESOURCE ARRAY r_array_db_fieldname
+{
+	items=
+	{
+		LBUF { txt="使用者名稱"; },
+		LBUF { txt="密碼"; },
+		LBUF { txt="PIN"; },
+		LBUF { txt="信用卡號"; },
+		LBUF { txt="信用卡型式"; },
+		LBUF { txt="使用期限"; }
+	};
+}
+
+RESOURCE TBUF r_tbuf_applistfixed { buf = "程式列表已修復"; }
+RESOURCE TBUF r_tbuf_errlaunchapp { buf = "啟動程式時發生錯誤"; }
+RESOURCE TBUF r_tbuf_errsaveconfig { buf = "儲存設定時發生錯誤"; }
+RESOURCE TBUF r_tbuf_errsavesnapshot { buf = "儲存快照時發生錯誤";}
+RESOURCE TBUF r_tbuf_hotkeydisabled { buf = "熱鍵已取消"; }
+RESOURCE TBUF r_tbuf_hotkeyenabled { buf = "熱鍵已啟動"; }
+RESOURCE TBUF r_tbuf_nomarkedtasks { buf = "沒有選擇的任務";}
+RESOURCE TBUF r_tbuf_noprevsnapshot { buf = "沒有快照可載入";}
+RESOURCE TBUF r_tbuf_nosnapshot { buf = "沒有載入任何的快照";}
+RESOURCE TBUF r_tbuf_scannerstopping { buf = "掃描器中止中，請稍候"; }
+RESOURCE TBUF r_tbuf_snapshotloaded { buf = "快照已載入";}
+RESOURCE TBUF r_tbuf_snapshotupdated { buf = "快照已更新";}
+RESOURCE TBUF r_tbuf_stopbeam { buf = "等待傳送結束"; }
+RESOURCE TBUF r_tbuf_stopscanner { buf = "請取消掃描器"; }
+RESOURCE TBUF r_tbuf_tasksflushed { buf = "程序已沖洗";}
+RESOURCE TBUF r_tbuf_validating { buf = "確認中…"; }
+
+//RESOURCE TBUF r_tbuf_beamer_busy { buf = "傳送檔案忙碌中，請稍候"; }
+RESOURCE TBUF r_tbuf_beamer_cancelled { buf = "檔案傳送已取消"; }
+RESOURCE TBUF r_tbuf_beamer_fileopenerr { buf = "無法開啟檔案"; }
+RESOURCE TBUF r_tbuf_beamer_irdahrerr { buf = "紅外線 RHostResolver 發生錯誤！"; }
+RESOURCE TBUF r_tbuf_beamer_irdamissing { buf = "找不到線外線驅動程式！"; }
+RESOURCE TBUF r_tbuf_beamer_irdanodevice { buf = "找不到遠端裝置。"; }
+RESOURCE TBUF r_tbuf_beamer_obexconnect { buf = "連接中…"; }
+RESOURCE TBUF r_tbuf_beamer_obexconnecterr { buf = "OBEX 連接失敗。"; }
+RESOURCE TBUF r_tbuf_beamer_obexdisconnect { buf = "已完成。斷線中…"; }
+RESOURCE TBUF r_tbuf_beamer_obexdisconnecterr { buf = "斷線時發生錯誤。已中止。"; }
+RESOURCE TBUF r_tbuf_beamer_obexputerr { buf = "OBEX PUT 失敗。斷線中…"; }
+RESOURCE TBUF r_tbuf_beamer_obexretry { buf = "OBEX 搜尋發生錯誤。重試中。"; }
+RESOURCE TBUF r_tbuf_beamer_obexsearch { buf = "OBEX 搜尋"; }
+RESOURCE TBUF r_tbuf_beamer_obexsearcherr { buf = "OBEX 調查失敗。中止中。"; }
+RESOURCE TBUF r_tbuf_beamer_sending { buf = "傳送 "; }
+RESOURCE TBUF r_tbuf_beamer_skipfolder { buf = "略過資料夾 "; }
+
+RESOURCE TBUF r_tbuf_bjackbtdisabled { buf = "藍芽尚未啟動！"; }
+RESOURCE TBUF r_tbuf_bjackbtlinkmissing { buf = "找不到藍芽連線管理員！"; }
+RESOURCE TBUF r_tbuf_bjackbusy { buf = "Bluejack 模組忙碌中"; }
+RESOURCE TBUF r_tbuf_bjackcached { buf = "在快取裡找到裝置。"; }
+RESOURCE TBUF r_tbuf_bjackcachedecay { buf = "在快取裡找到裝置，等待 decay 中。"; }
+RESOURCE TBUF r_tbuf_bjackcachefull { buf = "找到裝置 (快取已滿)"; }
+RESOURCE TBUF r_tbuf_bjackcachefullskip { buf = "裝置暫存已滿. 忽略中."; }
+RESOURCE TBUF r_tbuf_bjackcooloff { buf = "堆疊休眠"; }
+RESOURCE TBUF r_tbuf_bjackerr { buf = "Bluejack 發生錯誤 "; }
+RESOURCE TBUF r_tbuf_bjackerrsavelog { buf = "儲存掃描記錄時發生錯誤"; }
+RESOURCE TBUF r_tbuf_bjackerrvcard { buf = "無法開啟電子名片"; }
+RESOURCE TBUF r_tbuf_bjackfounddevice { buf = "找到裝置"; }
+RESOURCE TBUF r_tbuf_bjacklogmissing { buf = "找不到記錄檔"; }
+RESOURCE TBUF r_tbuf_bjackmsgsaved { buf = "訊息已儲存"; }
+RESOURCE TBUF r_tbuf_bjackmsgtoolong { buf = "最多 20 個字元"; }
+RESOURCE TBUF r_tbuf_bjacknodevices { buf = "找不到更多的裝置"; }
+RESOURCE TBUF r_tbuf_bjackobexconnerr { buf = "OBEX 連線失敗 "; }
+RESOURCE TBUF r_tbuf_bjackobexfound { buf = "OBEX 已找到"; }
+RESOURCE TBUF r_tbuf_bjackobexput { buf = "OBEX Put"; }
+RESOURCE TBUF r_tbuf_bjackobexsearcherr { buf = "OBEX 搜尋錯誤 "; }
+RESOURCE TBUF r_tbuf_bjackscannerstarted { buf = "掃描器已開始"; }
+RESOURCE TBUF r_tbuf_bjackscannerterminated { buf = "掃描器已終止"; }
+RESOURCE TBUF r_tbuf_bjackscannerterminating { buf = "終止掃描器中。請稍候。"; }
+RESOURCE TBUF r_tbuf_bjackscanning { buf = "掃描中…"; }
+RESOURCE TBUF r_tbuf_bjacksuccess { buf = "Bluejacked！"; }
+RESOURCE TBUF r_tbuf_bjacktimeout { buf = "暫停…"; }
+
+RESOURCE TBUF r_tbuf_fileman_confirm_delete { buf = "您確定要刪除這些項目嗎？"; }
+RESOURCE TBUF r_tbuf_fileman_copy { buf = "%d 項目已複製"; }
+RESOURCE TBUF r_tbuf_fileman_crccancelled { buf = "CRC 計算已取消"; }
+RESOURCE TBUF r_tbuf_fileman_cut { buf = "%d 個項目已剪下"; }
+RESOURCE TBUF r_tbuf_fileman_errmkdir { buf = "新增資料夾時發生錯誤"; }
+RESOURCE TBUF r_tbuf_fileman_errreadattr { buf = "讀取檔案屬性時發生錯誤"; }
+RESOURCE TBUF r_tbuf_fileman_errreadfolder { buf = "讀取資料夾時發生錯誤"; }
+RESOURCE TBUF r_tbuf_fileman_errrename { buf = "更改名稱時發生錯誤"; }
+RESOURCE TBUF r_tbuf_fileman_errsetattribs { buf = "設定檔案屬性時發生錯誤"; }
+RESOURCE TBUF r_tbuf_fileman_invalidfilename { buf = "錯誤的名稱"; }
+RESOURCE TBUF r_tbuf_fileman_openerr { buf = "開啟檔案時發生錯誤"; }
+RESOURCE TBUF r_tbuf_fileman_sametargetsource { buf = "目標與來源相同，請改使用建立複製功能。"; }
+RESOURCE TBUF r_tbuf_fileman_wrongselect { buf = "無法選擇一個磁碟區或是上一層目錄"; }
+RESOURCE TBUF r_tbuf_fileman_appnotregistered { buf = "應用程式未註冊"; }
+RESOURCE TBUF r_tbuf_fileman_copying { buf = "複製中 "; }
+RESOURCE TBUF r_tbuf_fileman_moving { buf = "移動中 "; }
+RESOURCE TBUF r_tbuf_fileman_deleting { buf = "刪除中 "; }
+RESOURCE TBUF r_tbuf_fileman_renaming { buf = "更改名稱中 "; }
+RESOURCE TBUF r_tbuf_fileman_initfailure { buf = "檔案管理員初始失敗"; }
+RESOURCE TBUF r_tbuf_fileman_errscansubfolder { buf = "掃描子目錄時發生錯誤"; }
+RESOURCE TBUF r_tbuf_fileman_erropensource { buf = "開啟來源檔案時發生錯誤"; }
+RESOURCE TBUF r_tbuf_fileman_samelocation { buf = "目標是來源的子目錄"; }
+RESOURCE TBUF r_tbuf_fileman_cantwritetarget { buf = "目標已存在或是無法建立目標"; }
+RESOURCE TBUF r_tbuf_fileman_errsourcelock { buf = "來源正在使用中"; }
+RESOURCE TBUF r_tbuf_fileman_errdirfull { buf = "資料夾已滿"; }
+RESOURCE TBUF r_tbuf_fileman_errdevdismount { buf = "裝置已卸載"; }
+RESOURCE TBUF r_tbuf_fileman_errfilelock { buf = "檔案已鎖定"; }
+RESOURCE TBUF r_tbuf_fileman_errdevnotready { buf = "裝置未載入"; }
+RESOURCE TBUF r_tbuf_fileman_erraccessdenied { buf = "存取失敗. 檔案是否為唯讀？"; }
+RESOURCE TBUF r_tbuf_fileman_errdiskfull { buf = "磁碟已滿"; }
+RESOURCE TBUF r_tbuf_fileman_errwrite { buf = "寫入錯誤"; }
+RESOURCE TBUF r_tbuf_fileman_errpathnotfound { buf = "找不到路徑"; }
+RESOURCE TBUF r_tbuf_fileman_errgeneral { buf = "一般錯誤 "; }
+RESOURCE TBUF r_tbuf_fileman_errreadfile { buf = "讀取檔案時發生錯誤"; }
+
+RESOURCE TBUF r_tbuf_misc_done { buf = "完成"; }
+RESOURCE TBUF r_tbuf_misc_errors { buf = "發生錯誤"; }
+RESOURCE TBUF r_tbuf_misc_busy { buf = "忙碌中…"; }
+RESOURCE TBUF r_tbuf_misc_fc_bjack_sweep { buf = "停止區域掃描"; }
+RESOURCE TBUF r_tbuf_misc_info_title { buf = "資訊"; }
+RESOURCE TBUF r_tbuf_misc_delete_title { buf = "刪除"; }
+
+RESOURCE TBUF r_tbuf_db_recordmissing { buf = "無法找到記錄，資料庫有錯誤？"; }
+RESOURCE TBUF r_tbuf_db_confirm_delete { buf = "確認刪除動作？"; }
+RESOURCE TBUF r_tbuf_db_err_delete { buf = "刪除記錄時發生錯誤"; }
+RESOURCE TBUF r_tbuf_db_err_mass_delete { buf = "錯誤。部分記錄未刪除"; }
+RESOURCE TBUF r_tbuf_db_err_save { buf = "儲存記錄時發生錯誤，資料庫有錯誤？"; }
+RESOURCE TBUF r_tbuf_db_err_read { buf = "讀取資料庫時發生錯誤"; }
+RESOURCE TBUF r_tbuf_db_err_create { buf = "建立資料庫時發生錯誤"; }
+RESOURCE TBUF r_tbuf_db_err_compact { buf = "壓縮資料庫時發生錯誤"; }
+RESOURCE TBUF r_tbuf_db_err_updatestats { buf = "更新統計資料時發生錯誤"; }
+RESOURCE TBUF r_tbuf_db_err_norecords { buf = "沒有選取的記錄"; }
+RESOURCE TBUF r_tbuf_db_confirm_cancel { buf = "取消變更？"; }
+RESOURCE TBUF r_tbuf_db_confirm_cancel_title { buf = "確認"; }
+RESOURCE TBUF r_tbuf_db_err_changepassword { buf = "更改密碼時發生錯誤"; }
+RESOURCE TBUF r_tbuf_db_err_passwordnomatch { buf = "密碼不一致"; }
+RESOURCE TBUF r_tbuf_db_msg_encrypting { buf = "加密資料庫存取金鑰"; }
+RESOURCE TBUF r_tbuf_db_err_reinit { buf = "刪除資料庫時發生錯誤"; }
+RESOURCE TBUF r_tbuf_db_confirm_reinit { buf = "這將會清除掉所有的東西，您確定嗎？"; }
+RESOURCE TBUF r_tbuf_db_err_nodb { buf = "找不到資料庫檔案"; }
+RESOURCE TBUF r_tbuf_db_no_displayname { buf = "顯示名稱為空白，記錄未建立。"; }
+
+// Added Sept 18th
+RESOURCE TBUF r_tbuf_db_msg_deleting { buf = "刪除中…請稍候"; }
+
+RESOURCE MENU_PANE r_agenda_options
+{
+	items=
+	{
+		MENU_ITEM { cascade=r_agenda_completed_menu; txt="顯示已完成項目"; },
+		MENU_ITEM { cascade=r_agenda_autoexpand_menu; txt="自動展開"; },
+		MENU_ITEM { command=cmdAgendaSetTodoMaxPriority; txt="指定工作重要性"; flags = EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdZoom; txt="縮放"; }
+	};
+}
+
+RESOURCE MENU_PANE r_agenda_completed_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdAgendaCompleteCalendar; txt="行事曆"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdAgendaCompleteTodo; txt="工作項目"; flags=EEikMenuItemCheckBox; }
+	};
+}
+
+RESOURCE MENU_PANE r_agenda_autoexpand_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdAgendaAutoExpandCalendar; txt="行事曆"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdAgendaAutoExpandTodo; txt="工作項目"; flags=EEikMenuItemCheckBox; }
+	};
+}
+
+RESOURCE MENU_BAR r_agenda_menubar
+{
+	titles=
+   	{
+		MENU_TITLE { menu_pane=r_agenda_options; txt="今日行程"; },
+		MENU_TITLE { menu_pane=r_generic_fn; txt="功能"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE TBUF r_tbuf_agenda_nofile { buf = "找不到行事曆檔案"; }
+RESOURCE TBUF r_tbuf_agenda_operr { buf = "行事曆運作錯誤 #"; }
+RESOURCE TBUF r_tbuf_agenda_openerror { buf = "開啟行事曆時發生錯誤"; }
+RESOURCE TBUF r_tbuf_agenda_busy { buf = "讀取行事曆…"; }
+RESOURCE TBUF r_tbuf_agenda_errupdatetodo { buf = "更新項目時發生錯誤"; }
+RESOURCE TBUF r_tbuf_agenda_notfound_or_error { buf = "項目遺失或是無法讀取行事曆檔案"; }
+RESOURCE TBUF r_tbuf_agenda_none { buf = "<無>"; }
+RESOURCE TBUF r_tbuf_agenda_notimplemented { buf = "尚未建立功能"; }
+
+RESOURCE MENU_PANE r_fn_utilities_menu
+{
+	items =
+	{
+		MENU_ITEM { command=cmdUtilsFixApplist; txt="修正程式列表"; },
+		MENU_ITEM { command=cmdUtilsCompContacts; txt="壓縮通訊錄"; },
+		MENU_ITEM { command=cmdUtilsAgendaFixSynchTimeZone; txt="修正同步時區"; },
+		MENU_ITEM { command=cmdUtilsFontSelector; txt="設定系統字型"; },
+		MENU_ITEM { command=cmdUtilsP900toP800; txt="P900 改 P800"; },
+		MENU_ITEM { cascade=r_fixapporder_menu; command=cmdCascadeFixAppOrder; txt="修正程式排列"; },
+		MENU_ITEM { command=cmdAutoStartCascade; cascade=r_options_autostart_menu; txt="自動啟動"; }
+	};
+}
+
+RESOURCE MENU_PANE r_fixapporder_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdUtilsFixAppOrderReset; txt="重設"; },
+		MENU_ITEM { command=cmdUtilsFixAppOrderRestore; txt="恢復"; },
+		MENU_ITEM { command=cmdUtilsFixAppOrderBackup; txt="備份"; }
+	};
+}
+
+RESOURCE TBUF r_tbuf_util_errcompactcontacts { buf = "壓縮通訊錄時發生錯誤"; }
+
+RESOURCE QIK_TOOLBAR r_toolbar_agenda
+{
+	height = EQikToolbarHeight - 4;
+	controls = 
+	{
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdAgendaRead;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderReload;
+			bmpmask = EMbmMyheaderReloadmask;
+		},
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdAgendaViewOtherDate;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderTodayviewwarp;
+			bmpmask = EMbmMyheaderTodayviewwarpmask;
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_agenda_calendar_detailed
+{
+	title = "行事曆資訊";
+	buttons = R_EIK_BUTTONS_OK;
+	flags = EEikDialogFlagWait;
+	pages = r_dialog_agenda_calendar_detailed_pages;
+}
+
+RESOURCE ARRAY r_dialog_agenda_calendar_detailed_pages
+{
+	items = 
+	{	
+		PAGE
+		{
+			id = idAgendaPage_Summary;		
+			text = "概要";
+			lines = r_dialog_agenda_calendar_summary_page;
+		},
+		PAGE
+		{
+			id = idAgendaPage_Notes;
+			text = "註釋";
+			lines = r_dialog_agenda_calendar_notes_page;
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_agenda_calendar_summary_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "開始：";
+			type = EEikCtLabel;
+			id = cAgendaDetailStartDateTime;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "結束：";
+			type = EEikCtLabel;
+			id = cAgendaDetailEndDateTime;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "鬧鈴：";
+			type = EEikCtLabel;
+			id = cAgendaDetailAlarmDateTime;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "地點：";
+			type = EEikCtLabel;
+			id = cAgendaDetailLocation;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_agenda_calendar_notes_page
+{
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cAgendaDetailNotes;
+			control = GTXTED 
+			{ 
+				height = 22 * 4 + 40; width = 200; numlines = 4; flags = EEikEdwinReadOnly | EEikEdwinDisplayOnly;
+			};
+		}		
+	};
+}
+
+RESOURCE DIALOG r_dialog_agenda_todo_detailed
+{
+	title = "工作項目資訊";
+	buttons = R_EIK_BUTTONS_OK;
+	flags = EEikDialogFlagWait;
+	pages = r_dialog_agenda_todo_detailed_pages;
+}
+
+RESOURCE ARRAY r_dialog_agenda_todo_detailed_pages
+{
+	items = 
+	{	
+		PAGE
+		{
+			id = idAgendaPage_Summary;		
+			text = "概要";
+			lines = r_dialog_agenda_todo_summary_page;
+		},
+		PAGE
+		{
+			id = idAgendaPage_Notes;
+			text = "註釋";
+			lines = r_dialog_agenda_todo_notes_page;
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_agenda_todo_summary_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "到期日：";
+			type = EEikCtLabel;
+			id = cAgendaDetailEndDateTime;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "鬧鈴：";
+			type = EEikCtLabel;
+			id = cAgendaDetailAlarmDateTime;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "重要性：";
+			type = EEikCtLabel;
+			id = cAgendaDetailPriority;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "已完成：";
+			type = EEikCtCheckBox;
+			id = cAgendaDetailTodoDone;
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_agenda_todo_notes_page
+{
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cAgendaDetailNotes;
+			control = GTXTED 
+			{ 
+				height = 22 * 4 + 40; width = 200; numlines = 4; flags = EEikEdwinReadOnly | EEikEdwinDisplayOnly;
+			};
+		}		
+	};
+}
+
+RESOURCE TBUF r_tbuf_fileman_prop_isfolder { buf = "是一個資料夾"; }
+RESOURCE TBUF r_tbuf_fileman_prop_size { buf = "大小為 "; }
+RESOURCE TBUF r_tbuf_fileman_prop_byte { buf = " 位元組"; }
+RESOURCE TBUF r_tbuf_fileman_prop_lastmod { buf = "最後一次修改日期： "; }
+RESOURCE TBUF r_tbuf_unassigned { buf = "<未指定>%c%u"; }
+RESOURCE TBUF r_tbuf_unassigned2 { buf = "<未指定>%c%c%c%c"; }
+
+//--------- v1.2b --------------
+
+RESOURCE TBUF r_tbuf_utils_fixapporder_backupfail { buf = "建立備份時發生錯誤。"; }
+RESOURCE TBUF r_tbuf_utils_fixapporder_failed { buf = "恢復備份時發生錯誤，修正失敗。"; }
+RESOURCE TBUF r_tbuf_utils_fixapporder_confirmrestore { buf = "這將會把所有在備份之後安裝的應用程式移到 \"未歸檔\" 的分類中，其它的應用程式則會歸類到備份時的設定。您確定嗎?\n\r上次的備份日期為：\n"; }
+RESOURCE TBUF r_tbuf_utils_fixapporder_confirmreset { buf = "這將會把所有使用者自行安裝的應用程式移到 \"未歸檔\" 的分類中，其它的應用程式則會歸類到他們預設的分類。您確定嗎？"; }
+RESOURCE TBUF r_tbuf_utils_fixapporder_confirmbackup { buf = "您已經有一個備份存在。您確定要建立一個新的備份並覆蓋原先的嗎？\n\r先前的備份日期為：\n"; }
+RESOURCE TBUF r_tbuf_utils_fixapporder_waitawhile { buf = "重新啟動應用程式。手機反應可能會慢一下子"; }
+
+//--------- P900 fix -----------
+RESOURCE TBUF r_tbuf_fc_bluejacktxt { buf = "SMan - Bluejack 記錄"; }
+
+//--------- v1.3 ---------------
+RESOURCE TBUF r_tbuf_edit_notextselected { buf = "尚未選取任何文字"; }
+RESOURCE TBUF r_tbuf_utils_compresscontacts_line1 { buf = "壓縮前空間： "; }
+RESOURCE TBUF r_tbuf_utils_compresscontacts_line2 { buf = "壓縮後空間： "; }
+RESOURCE TBUF r_tbuf_utils_compresscontacts_saved { buf = "節省空間： "; }
+RESOURCE TBUF r_tbuf_utils_fixsynchtimezone_confirm { buf = "確認動作？"; }
+RESOURCE TBUF r_tbuf_fileman_toomanydupes { buf = "太多複製檔案"; }
+RESOURCE TBUF r_tbuf_fileman_findingslot { buf = "偵測複製檔名中…"; }
+RESOURCE TBUF r_tbuf_fileman_duplicating { buf = "製做複製檔案中…"; }
+RESOURCE TBUF r_tbuf_fileman_errordupe { buf = "製作複製檔案時發生錯誤"; }
+RESOURCE TBUF r_tbuf_fileman_dupedone { buf = "複製成 "; }
+RESOURCE TBUF r_tbuf_fileman_errsetmodified { buf = "設定日期/時間時發生錯誤"; }
+RESOURCE TBUF r_tbuf_dtmf_generating { buf = "產生 DTMF 音訊中..."; }
+RESOURCE TBUF r_tbuf_dtmf_nonumber { buf = "沒有號碼"; }
+RESOURCE TBUF r_tbuf_hexedit_notready { buf = "取得檔案大小時發生錯誤"; }
+RESOURCE TBUF r_tbuf_hexedit_buffull { buf = "請儲存檔案。緩衝區已滿。"; }
+RESOURCE TBUF r_tbuf_hexedit_errorwritefile { buf = "寫入檔案時發生錯誤"; }
+RESOURCE TBUF r_tbuf_hexedit_endoffile { buf = "已達檔案結尾"; }
+RESOURCE TBUF r_tbuf_hexedit_beginningoffile { buf = "已達檔案開頭"; }
+RESOURCE TBUF r_tbuf_hexedit_readonly { buf = "唯讀"; }
+RESOURCE TBUF r_tbuf_hexedit_fileinrom { buf = "檔案存於 ROM！"; }
+RESOURCE TBUF r_tbuf_hexedit_fileisreadonly { buf = "檔案是唯讀的"; }
+RESOURCE TBUF r_tbuf_hexedit_smanfile { buf = "無法編輯 - SMan 需要此檔"; }
+RESOURCE TBUF r_tbuf_hexedit_writeerror { buf = "寫入錯誤"; }
+RESOURCE TBUF r_tbuf_hexedit_sizeerror { buf = "已儲存。讀取檔案大小時發生錯誤"; }
+RESOURCE TBUF r_tbuf_hexedit_truncerror { buf = "已儲存。調整檔案大小時發生錯誤"; }
+RESOURCE TBUF r_tbuf_hexedit_seekerror { buf = "未儲存。搜尋錯誤"; }
+RESOURCE TBUF r_tbuf_hexedit_flusherror { buf = "未儲存。沖洗錯誤"; }
+RESOURCE TBUF r_tbuf_hexedit_writeok { buf = "已儲存"; }
+RESOURCE TBUF r_tbuf_hexedit_nochanges { buf = "沒有任何變更"; }
+RESOURCE TBUF r_tbuf_hexedit_getdateerror { buf = "取得日期時發生錯誤"; }
+RESOURCE TBUF r_tbuf_findfile_topreceedsfrom { buf = "開始日期早於結束日期"; }
+RESOURCE TBUF r_tbuf_findfile_nolocation { buf = "尚未指定搜尋位置"; }
+RESOURCE TBUF r_tbuf_findfile_invalidsearchname { buf = "錯誤的搜尋名稱"; }
+RESOURCE TBUF r_tbuf_findfile_errorsinsearch { buf = "發生錯誤，搜尋未完成"; }
+RESOURCE TBUF r_tbuf_findfile_sorting { buf = "排序結果中…"; }
+RESOURCE TBUF r_tbuf_findfile_done { buf = "已找到 %d 個檔案"; }
+RESOURCE TBUF r_tbuf_utils_misc_reboot { buf = "請重新啟動手機來查看變更"; }
+RESOURCE TBUF r_tbuf_fc_cellareatxt { buf = "SMan - 網路資訊"; }
+RESOURCE TBUF r_tbuf_autostart_errdelete { buf = "移除識別器時發生錯誤"; }
+RESOURCE TBUF r_tbuf_autostart_errcopy { buf = "複製識別器時發生錯誤"; }
+RESOURCE TBUF r_tbuf_autostart_enabled { buf = "已啟用自動啟動功能"; }
+RESOURCE TBUF r_tbuf_autostart_disabled { buf = "已停用自動啟動功能"; }
+RESOURCE TBUF r_tbuf_autostart_deactivate { buf = "停用"; }
+RESOURCE TBUF r_tbuf_shortcut_fcinvalid { buf = "錯誤的捷徑於闔蓋模式"; }
+RESOURCE TBUF r_tbuf_misc_unsupported { buf = "未支援"; }
+RESOURCE TBUF r_tbuf_cellid_errinitstore { buf = "載入 cell 資料庫時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_errreadgroups { buf = "讀取群組資訊時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_errcreategroup { buf = "建立群組時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_autorecordok { buf = "自動計錄已開始"; }
+RESOURCE TBUF r_tbuf_cellid_errautosave { buf = "自動計錄已停止。儲存 cell 資訊時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_autorecordoff { buf = "自動記錄已停止"; }
+RESOURCE TBUF r_tbuf_cellid_genericeditordialog_strrequired { buf = "您必需指定某個事件！"; }
+RESOURCE TBUF r_tbuf_cellid_errdelgroup { buf = "刪除群組時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_errsetgroupstate { buf = "設定群組狀態時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_errrengroup { buf = "更改群組名時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_noitemsselected { buf = "尚未選取任何項目"; }
+RESOURCE TBUF r_tbuf_cellid_errdelcell { buf = "刪除 cell 時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_errcreatecell { buf = "建立 cell 時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_errsavecell { buf = "儲存 cell 時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_requirecountrycode { buf = "需要國家編號"; }
+RESOURCE TBUF r_tbuf_cellid_requirenetworkid { buf = "需要網路編號"; }
+RESOURCE TBUF r_tbuf_cellid_noitems { buf = "沒有項目！"; }
+RESOURCE TBUF r_tbuf_cellid_nogroups { buf = "沒有群組！"; }
+RESOURCE TBUF r_tbuf_cellid_disableautorec { buf = "請先取消自動記錄"; }
+RESOURCE TBUF r_tbuf_cellid_errcellexists { buf = "Cell 已存在於這個群組"; }
+RESOURCE TBUF r_tbuf_cellid_errdbcompress { buf = "壓縮資料庫時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_errdbupdatestats { buf = "更新統計資料時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_errreaddb { buf = "讀取資料庫時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_cellnotfound { buf = "找不到 Cell"; }
+RESOURCE TBUF r_tbuf_cellid_groupnotfound { buf = "找不到群組"; }
+RESOURCE TBUF r_tbuf_cellid_errmovegroup { buf = "移動群組時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_errmoveevent { buf = "移動事件時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_cantmove { buf = "無法往那個方向移動"; }
+RESOURCE TBUF r_tbuf_cellid_noaudiofile { buf = "尚未指定音訊檔"; }
+RESOURCE TBUF r_tbuf_cellid_errsaveevent { buf = "儲存事件時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_errdelevents { buf = "刪除事件時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_errseteventstate { buf = "設定事件狀態時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_errunknowneventtype { buf = "未知的事件型式"; }
+RESOURCE TBUF r_tbuf_cellid_errcreateoutput { buf = "建立輸出檔案時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_numexported { buf = "已匯出群組："; }
+//RESOURCE TBUF r_tbuf_cellid_errimportlistfiles { buf = "列出匯入檔案時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_noimportfiles { buf = "沒有檔案可匯入"; }
+RESOURCE TBUF r_tbuf_cellid_errparsingimportfile { buf = "分析匯入檔案時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_errreadingimportfile { buf = "讀取匯入檔案時發生錯誤"; }
+RESOURCE TBUF r_tbuf_cellid_errmisc { buf = "錯誤發生在行數："; }
+RESOURCE TBUF r_tbuf_cellid_impexp_generalerror { buf = "錯誤發生在行數 "; }
+RESOURCE TBUF r_tbuf_cellid_impexp_generaldberror { buf = "資料庫回覆錯誤 "; }
+RESOURCE TBUF r_tbuf_misc_dbrecovery { buf = "恢復索引值"; }
+RESOURCE TBUF r_tbuf_misc_dbupdatestats { buf = "更新統計資料"; }
+RESOURCE TBUF r_tbuf_misc_errrecovery { buf = "恢復資料庫時發生錯誤"; }
+RESOURCE TBUF r_tbuf_misc_erropendb { buf = "開啟資料庫時發生錯誤"; }
+RESOURCE TBUF r_tbuf_misc_processing { buf = "處理中 "; }
+RESOURCE TBUF r_tbuf_cellid_exportingas { buf = "匯出成 "; }
+RESOURCE TBUF r_tbuf_cellid_shortname { buf = "簡稱："; }
+RESOURCE TBUF r_tbuf_cellid_longname { buf = "全名："; }
+RESOURCE TBUF r_tbuf_cellid_countrycode { buf = "國家編號："; }
+RESOURCE TBUF r_tbuf_cellid_networkid { buf = "網路編號："; }
+RESOURCE TBUF r_tbuf_cellid_cell { buf = "Cell："; }
+RESOURCE TBUF r_tbuf_cellid_cellid { buf = "Cell 編號："; }
+RESOURCE TBUF r_tbuf_cellid_group { buf = "群組："; }
+RESOURCE TBUF r_tbuf_cellid_multigroup { buf = "群組[*]："; }
+RESOURCE TBUF r_tbuf_cellid_signalstrength { buf = "訊號長度："; }
+RESOURCE TBUF r_tbuf_bjack_errloadexlist { buf = "無法載入忽略清單"; }
+RESOURCE TBUF r_tbuf_bjack_errsaveexlist { buf = "無法儲存忽略清單"; }
+RESOURCE TBUF r_tbuf_bjack_exclude { buf = "在忽略清單中發現裝置。忽略中。"; }
+RESOURCE TBUF r_tbuf_misc_warning { buf = "警告"; }
+RESOURCE TBUF r_tbuf_recog_warning { buf = "自動啟動模組需要將會存放至 C: 磁碟。如果這個模組發生錯誤，它可能會造成您的手機 \
+無法使用直到您將它送至客服重設。\n\r您確定您要繼續嗎？"; }
+RESOURCE TBUF r_tbuf_db_export { buf = "匯出至："; }
+RESOURCE TBUF r_tbuf_db_export_erroutput { buf = "建立輸出檔案時發生錯誤"; }
+RESOURCE TBUF r_tbuf_db_createrecord { buf = "插入記錄時發生錯誤"; }
+RESOURCE TBUF r_tbuf_misc_navigation_noselection { buf = "尚未選取任何模組"; }
+RESOURCE TBUF r_tbuf_utils_p900top800_errdelete { buf = "刪除部分檔案時發生錯誤"; }
+RESOURCE TBUF r_tbuf_utils_p900top800_errcopy { buf = "複製 INI 檔案時發生錯誤"; }
+RESOURCE TBUF r_tbuf_misc_errcreatefile { buf = "建立檔時發生錯誤"; }
+RESOURCE TBUF r_tbuf_misc_errzipmissing { buf = "Zip 檔案遺失"; }
+RESOURCE TBUF r_tbuf_misc_errreadzip { buf = "讀取 zip 時發生錯誤。已損壞？"; }
+RESOURCE TBUF r_tbuf_misc_errinitzip { buf = "啟始 zip 程式庫時發生錯誤"; }
+RESOURCE TBUF r_tbuf_misc_erropenzip { buf = "開啟 zip 檔時發生錯誤"; }
+RESOURCE TBUF r_tbuf_utils_p900top800_confirm { buf = "這將會套用標準佈景的顏色設定，請順便執行位在\"控制台\"的\"鈴聲與音效\" \
+並重新檢視您的設定，您將仍然可以聽到事件 (使用預設音效) 但該設定可能會指定到已被 SMan 刪除的檔案上。\n\r繼續這個動作嗎？"; }
+RESOURCE TBUF r_tbuf_folderfile_browser_onlyselectfile { buf = "只可以選取檔案"; }
+RESOURCE TBUF r_tbuf_misc_fatalerror { buf = "嚴重錯誤"; }
+RESOURCE TBUF r_tbuf_utils_p900top800_failed { buf = "取代位於 C:\\SYSTEM\\DATA\\THEMES 的 .INI 檔時發生錯誤。\n\r請馬上套用一個佈景不然您的裝置可能無法再啟動！！！"; }
+RESOURCE TBUF r_tbuf_alt_title_file_folder_browser_dialog { buf = "選擇檔案"; }
+
+RESOURCE MENU_PANE r_dtmf_edit
+{
+	items=
+	{
+		MENU_ITEM { command=cmdDTMFEditCut; txt="剪下"; flags=EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdDTMFEditCopy; txt="複製"; flags=EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdDTMFEditPaste; txt="貼上"; flags=EEikMenuItemDimmed | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdDTMFEditClear; txt="清除"; flags=EEikMenuItemDimmed; }
+	};
+}
+
+RESOURCE MENU_BAR r_dtmfdialer_menubar
+{
+	titles=
+   	{
+   		MENU_TITLE { menu_pane=r_dtmfdialer_dial; txt="撥號"; },
+   		MENU_TITLE { menu_pane=r_dtmf_edit; txt="編輯"; },
+		MENU_TITLE { menu_pane=r_generic_fn; txt="功能"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE MENU_PANE r_dtmfdialer_dial
+{
+	items=
+	{
+		MENU_ITEM { command=cmdDTMFDialerInput; txt="使用數字鍵"; flags=EEikMenuItemCheckBox; }
+	};
+}
+
+RESOURCE MENU_PANE r_hexeditor_file
+{
+	items=
+	{
+		MENU_ITEM { command=cmdHexEditorFileSave; txt="儲存"; },
+		MENU_ITEM { command=cmdHexEditorFileReload; txt="重新讀取"; },
+		MENU_ITEM { command=cmdHexEditorFilePreserveDate; txt="保留日期"; flags = EEikMenuItemCheckBox; }
+	};
+}
+
+RESOURCE MENU_PANE r_hexeditor_edit
+{
+	items=
+	{
+		MENU_ITEM { command=cmdHexEditorEditDeleteBytes; txt = "刪除"; flags=EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdHexEditorEditToggleReadOnly; txt="唯讀"; flags=EEikMenuItemCheckBox | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdHexEditorEditResize; txt="更改大小"; }
+	};
+}
+
+RESOURCE MENU_BAR r_hexeditor_menubar
+{
+	titles=
+	{
+		MENU_TITLE { menu_pane=r_hexeditor_file; txt="檔案"; },
+		MENU_TITLE { menu_pane=r_hexeditor_edit; txt="編輯"; }
+	};
+}
+
+RESOURCE QIK_TOOLBAR r_toolbar_hexeditor
+{
+	height = EQikToolbarHeight - 4;
+	controls = 
+	{
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdHexEditorBeginPage;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderHexeditbeginpage;
+			bmpmask = EMbmMyHeaderHexeditbeginpagemask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdHexEditorPrevPage;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderHexeditprevpage;
+			bmpmask = EMbmMyHeaderHexeditprevpagemask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdHexEditorGoto;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderHexeditgoto;
+			bmpmask = EMbmMyHeaderHexeditgotomask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdHexEditorNextPage;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderHexeditnextpage;
+			bmpmask = EMbmMyHeaderHexeditnextpagemask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdHexEditorEndPage;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderHexeditendpage;
+			bmpmask = EMbmMyHeaderHexeditendpagemask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdHexEditorBack;
+			bmpfile = "Z:\\SYSTEM\\DATA\\QUARTZ.MBM";
+			bmpid = EMbmQuartzBackarrow;
+			bmpmask = EMbmQuartzBackarrowmask;
+			alignment = EQikToolbarRight;
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_ok_cancel
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidCancel; button = CMBUT { txt = "取消"; }; },
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "確定"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_hexedit_gotooffset
+{
+	title = "輸入 Offset";
+	buttons = r_buttons_ok_cancel;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "Hex Offset：";
+			type = EEikCtEdwin;
+			id = cHexEditHexOffset;
+			control = EDWIN 
+			{ 
+				lines = 1; maxlength = 7; width = 8;
+			};
+		},
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "Dec Offset：";
+			id = cHexEditDecOffset;
+			control = QIK_NUMBER_EDITOR 
+			{ 
+				min = 0; max = 0x7fffffff;
+			};
+		},
+		DLG_LINE
+		{
+			type = EQikCtSlider;
+			prompt = "範圍：";
+			id = cHexEditSliderOffset;
+			control = QIK_SLIDER
+			{
+				min_value = 0;
+				// Something odd about this control. In the RSS definition, max_value is a WORD
+				// which only takes $FFFF as the max value. However, in the class, the max value
+				// is a TInt which goes up to 32 bits. hmmmmmmm.......
+				max_value = 0;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_hexedit_resize
+{
+	title = "更改視窗大小";
+	buttons = r_buttons_ok_cancel;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EQikCtSlider;
+			prompt = "Hex 視窗大小：";
+			id = cHexEditSliderResize;
+			control = QIK_SLIDER
+			{
+				min_value = 3;
+				max_value = 7;
+				flags = EQikSliderSnapToMarker;
+				num_markers = 5;
+			};
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_yes_no_cancel
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "確定"; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "放棄"; }; flags=EEikLabeledButtonIsDefault; },
+		DLG_BUTTON { id = EEikBidSpace; button = CMBUT { txt = "取消"; }; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_hexedit_confirmchanges
+{
+	title = "變更確認";
+	buttons = r_buttons_yes_no_cancel;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtLabel;
+			control = LABEL 
+			{
+				txt="您確定要變更本頁的內容嗎？";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		}
+	};
+}
+
+RESOURCE QIK_TOOLBAR r_toolbar_findfile
+{
+	height = EQikToolbarHeight - 4;
+	controls = 
+	{
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdFindFileStart;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderFindfilestart;
+			bmpmask = EMbmMyheaderFindfilestartmask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdFindFileStop;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderFindfilestop;
+			bmpmask = EMbmMyheaderFindfilestopmask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdFindFileCriteria;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderFindfilecriteria;
+			bmpmask = EMbmMyheaderFindfilecriteriamask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdFindFileBack;
+			bmpfile = "Z:\\SYSTEM\\DATA\\QUARTZ.MBM";
+			bmpid = EMbmQuartzBackarrow;
+			bmpmask = EMbmQuartzBackarrowmask;
+			alignment = EQikToolbarRight;
+		}
+	};
+}
+
+RESOURCE MENU_BAR r_findfile_menubar
+{
+	titles=
+   	{
+   		MENU_TITLE { menu_pane=r_findfile_options; txt="設定"; }
+	};
+}
+
+RESOURCE MENU_PANE r_findfile_options
+{
+	items=
+	{
+		MENU_ITEM { command=cmdZoom; txt = "縮放"; }
+	};
+}
+
+RESOURCE ARRAY r_findfile_modified_option_choices
+{
+	items =
+	{
+		LBUF { txt = "忽略"; },
+		LBUF { txt = "今天"; },
+		LBUF { txt = "昨天"; },
+		LBUF { txt = "其它"; }
+	};
+}
+
+RESOURCE ARRAY r_empty_array
+{
+	items =
+	{
+		// Do not change this. Does not require translation. 'W' chosen to maximize width
+		// of control that uses this. Used in PreLayoutDynInitL() of dialogs.
+		LBUF { txt = "WWWWWWWWWWWWWWWWWWW"; } 
+	};
+}
+
+RESOURCE DIALOG r_dialog_findfile_criteria
+{
+	title = "搜尋條件";
+	buttons = r_buttons_ok_cancel;
+	flags = EEikDialogFlagWait;
+	pages = r_dialog_findfile_criteria_pages;
+}
+
+RESOURCE ARRAY r_dialog_findfile_criteria_pages
+{
+	items = 
+	{	
+		PAGE
+		{
+			text = "一般";
+			lines = r_dialog_findfile_criteria_general_page;
+		},
+		PAGE
+		{
+			text = "日期";
+			lines = r_dialog_findfile_criteria_date_page;
+		}
+	};
+}
+
+RESOURCE ARRAY r_findfile_criteria_array
+{
+	items=
+	{	
+		LBUF { txt="*.*"; },
+		LBUF { txt="*.sis"; },
+		LBUF { txt="*.gif"; },
+		LBUF { txt="*.jpg"; },
+		LBUF { txt="*.zip"; }
+	};	
+}
+
+RESOURCE ARRAY r_dialog_findfile_criteria_general_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "名稱：";
+			type = EEikCtComboBox;
+			id = cFindFileSearchName;
+			control = COMBOBOX
+			{
+				maxarraysize = 5;
+				maxlength = 256;
+				width = 99;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "位置：";
+			type = EEikCtListBox;
+			id = cFindFileLocation;
+			control = LISTBOX
+			{
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				array_id = r_empty_array;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_findfile_criteria_date_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "修改日期：";
+			type = EEikCtChoiceList;
+			id = cFindFileModifiedOption;
+			control = CHOICELIST
+			{
+				array_id = r_findfile_modified_option_choices;
+			};
+		},
+		DLG_LINE
+		{
+			type = EQikCtDateEditor;
+			prompt = "從：";
+			id = cFindFileModifiedFromDate;
+			control = QIK_DATE_EDITOR
+			{
+				minDate = DATE
+				{
+					day = 0;
+					month = 0;
+					year = 1900;
+				};
+				maxDate = DATE
+				{
+					day = 30;
+					month = 11;
+					year = 2999;
+				};
+			};
+		},
+		DLG_LINE
+		{
+			type = EQikCtDateEditor;
+			prompt = "至：";
+			id = cFindFileModifiedToDate;
+			control = QIK_DATE_EDITOR
+			{
+				minDate = DATE
+				{
+					day = 0;
+					month = 0;
+					year = 1900;
+				};
+				maxDate = DATE
+				{
+					day = 30;
+					month = 11;
+					year = 2999;
+				};
+			};
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_fontselector
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "重設"; }; },
+		DLG_BUTTON { id = EEikBidCancel; button = CMBUT { txt = "取消"; }; },
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "確定"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_fontselector
+{
+	title = "選擇字型";
+	buttons = r_buttons_fontselector;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "字型：";
+			type = EEikCtChoiceList;
+			id = cFontSelectorFontList;
+			control = CHOICELIST
+			{
+				array_id = r_empty_array;
+			};
+		},
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "大小：";
+			id = cFontSelectorFontSize;
+			control = QIK_NUMBER_EDITOR { min = 5; max = 30; };
+		},
+		DLG_LINE
+		{
+			prompt = "反鋸齒狀：";
+			type = EEikCtCheckBox;
+			id = cFontSelectorAntiAlias;
+		},
+		DLG_LINE
+		{
+			prompt = "預覽：";
+			type = EEikCtRichTextEditor;
+			id = cFontSelectorPreview;
+			control = RTXTED
+			{ 
+				width = 150; height = 60; numlines = 20; flags = EEikEdwinNoHorizScrolling | EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinDisplayOnly;
+			};
+		}
+	};
+}
+
+RESOURCE MENU_PANE r_cellarea_edit
+{
+	items =
+	{
+		MENU_ITEM { command=cmdCellAreaEdit; txt="編輯"; flags = EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdCellAreaInitStore; txt="重新建立資料庫"; },
+		MENU_ITEM { command=cmdCellAreaCompress; txt="壓縮"; },
+		MENU_ITEM { command=cmdCellAreaUpdateStats; txt="更新統計資料"; }
+	};
+}
+
+RESOURCE MENU_PANE r_cellarea_options
+{
+	items=
+	{
+		MENU_ITEM { command=cmdCellAreaAlwaysRun; txt="總是執行"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdCellAreaToggleRecording; txt="自動記錄 Cell"; flags=EEikMenuItemCheckBox | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdCellAreaEventDelay; txt="事件延遲"; }
+	};	
+}
+
+RESOURCE MENU_BAR r_cellarea_menubar
+{
+	titles=
+   	{
+		MENU_TITLE { menu_pane = r_cellarea_options; txt="網路資訊"; },
+		MENU_TITLE { menu_pane = r_cellarea_edit; txt="資料庫"; },
+		MENU_TITLE { menu_pane = r_generic_fn; txt="功能"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE MENU_PANE r_fc_cellarea_menu
+{
+	items=
+	{
+		MENU_ITEM { cascade=r_fc_moduleswitch_menu; command=cmdFCSwitchMenu; txt="模組"; },
+		MENU_ITEM { command=cmdFlushOut; txt="沖洗程式"; },
+		MENU_ITEM { command=cmdUtilsFixApplist; txt="修正程式列表"; flags = EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdCellAreaAlwaysRun; txt="總是執行"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdCellAreaToggleRecording; txt="自動記錄"; flags=EEikMenuItemCheckBox; }
+	};	
+}
+
+RESOURCE MENU_PANE r_fc_moduleswitch_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdSwitchFCBJackView; txt="Bluejack";},
+		MENU_ITEM { command=cmdSwitchFCCellAreaView; txt="網路資訊"; }
+	};	
+}
+
+RESOURCE TBUF r_tbuf_credits { buf = "SMan 開發團隊特別感謝 \
+下列所有的人員以及組織：**\
+Symbian*- Phil Spencer*- David Mery**\
+Sony Ericsson*- James Lowerence*- Eric Goh**\
+Motorola*- Peter Ho**\
+Meero in My-Symbian.com's forum for the system font information**\
+所有翻譯 SMan 的人員**\
+所有贊助 SMan 的人員"; }
+
+RESOURCE DIALOG r_dialog_credits
+{
+	title = "感謝";
+	buttons = R_EIK_BUTTONS_DONE;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cCreditsText;
+			control = GTXTED
+			{ 
+				width = 150; height = 150; numlines = 20; flags = EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinDisplayOnly;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_edit_cells_dialog_groups_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtColListBox;
+			id = cCellDBGroupsListBox;
+			control = LISTBOX
+			{
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				array_id = r_empty_array;
+				height = 6;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_edit_cells_dialog_cells_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "群組：";
+			id = cCellDBSelectedGroupOnCellsPage;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array; 
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "Cell：";
+			type = EEikCtColListBox;
+			id = cCellDBCellsListBox;
+			control = LISTBOX
+			{
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				array_id = r_empty_array;
+				height = 5;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_edit_cells_dialog_events_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "群組：";
+			id = cCellDBSelectedGroupOnEventsPage;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "事件：";
+			type = EEikCtColListBox;
+			id = cCellDBEventsListBox;
+			control = LISTBOX
+			{
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				array_id = r_empty_array;
+				height = 5;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_edit_cells_dialog_importexport_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtListBox;
+			id = cCellDBImportExportGroupListBox;
+			control = LISTBOX 
+			{ 
+				array_id = r_empty_array;
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				height = 7;
+			};
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_edit_cells_dialog_groups_page
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidCellGroupSelectAll; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderAll; bmpmask = EMbmMyheaderAllmask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupSelectNone; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderNone; bmpmask = EMbmMyheaderNonemask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupShiftUp; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderUparrow; bmpmask = EMbmMyHeaderUparrowmask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupShiftDown; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderDownarrow; bmpmask = EMbmMyHeaderDownarrowmask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupEnable; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCheckmark; bmpmask = EMbmMyHeaderCheckmarkmask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupDisable; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCrossmark; bmpmask = EMbmMyHeaderCrossmarkmask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupDel; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditdelete; bmpmask = EMbmMyHeaderCelleditdeletemask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupNew; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditnew; bmpmask = EMbmMyHeaderCelleditnewmask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupRen; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditedit; bmpmask = EMbmMyHeaderCellediteditmask; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "確定"; }; }
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_edit_cells_dialog_cells_page
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidCellCellsSelectAll; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderAll; bmpmask = EMbmMyheaderAllmask; }; },
+		DLG_BUTTON { id = EEikBidCellCellsSelectNone; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderNone; bmpmask = EMbmMyheaderNonemask; }; },
+		DLG_BUTTON { id = EEikBidCellCellsFind; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderFindfile; bmpmask = EMbmMyheaderFindfilemask; }; },
+		DLG_BUTTON { id = EEikBidCellCellsDel; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditdelete; bmpmask = EMbmMyHeaderCelleditdeletemask; }; },
+		DLG_BUTTON { id = EEikBidCellCellsMove; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditmove; bmpmask = EMbmMyHeaderCelleditmovemask; }; },
+		DLG_BUTTON { id = EEikBidCellCellsNew; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditnew; bmpmask = EMbmMyHeaderCelleditnewmask; }; },
+		DLG_BUTTON { id = EEikBidCellCellsEdit; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditedit; bmpmask = EMbmMyHeaderCellediteditmask; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "確定"; }; }
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_edit_cells_dialog_events_page
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidCellEventsSelectAll; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderAll; bmpmask = EMbmMyheaderAllmask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsSelectNone; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderNone; bmpmask = EMbmMyheaderNonemask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsShiftUp; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderUparrow; bmpmask = EMbmMyHeaderUparrowmask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsShiftDown; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderDownarrow; bmpmask = EMbmMyHeaderDownarrowmask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsEnable; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCheckmark; bmpmask = EMbmMyHeaderCheckmarkmask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsDisable; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCrossmark; bmpmask = EMbmMyHeaderCrossmarkmask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsDel; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditdelete; bmpmask = EMbmMyHeaderCelleditdeletemask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsMove; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditmove; bmpmask = EMbmMyHeaderCelleditmovemask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsNew; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditnew; bmpmask = EMbmMyHeaderCelleditnewmask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsEdit; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditedit; bmpmask = EMbmMyHeaderCellediteditmask; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "確定"; }; }
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_edit_cells_dialog_importexport_page
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidCellImport; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditimport; bmpmask = EMbmMyHeaderCelleditimportmask; }; },
+		DLG_BUTTON { id = EEikBidCellExport; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditexport; bmpmask = EMbmMyHeaderCelleditexportmask; }; },
+		DLG_BUTTON { id = EEikBidCellImportExportSelectAll; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderAll; bmpmask = EMbmMyheaderAllmask; }; },
+		DLG_BUTTON { id = EEikBidCellImportExportSelectNone; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderNone; bmpmask = EMbmMyheaderNonemask; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "確定"; }; }
+	};
+}
+
+RESOURCE ARRAY r_edit_cells_dialog_pages
+{
+	items = 
+	{	
+		PAGE
+		{
+			id = idCellIdPage_Groups;
+			buttons = r_buttons_edit_cells_dialog_groups_page;
+			text = "群組";
+			lines = r_edit_cells_dialog_groups_page;
+		},
+		PAGE
+		{
+			id = idCellIdPage_Cells;
+			buttons = r_buttons_edit_cells_dialog_cells_page;
+			text = "Cell";
+			lines = r_edit_cells_dialog_cells_page;
+		},
+		PAGE
+		{
+			id = idCellIdPage_Events;
+			buttons = r_buttons_edit_cells_dialog_events_page;
+			text = "事件";
+			lines = r_edit_cells_dialog_events_page;
+		},
+		PAGE
+		{
+			id = idCellIdPage_ImportExport;
+			buttons = r_buttons_edit_cells_dialog_importexport_page;
+			text = "共享";
+			lines = r_edit_cells_dialog_importexport_page;
+		}
+	};
+}
+
+RESOURCE DIALOG r_edit_cells_dialog
+{
+	title = "Cell 資訊資料庫";
+	flags = EEikDialogFlagWait;
+	pages = r_edit_cells_dialog_pages;
+	//buttons = R_EIK_BUTTONS_OK;
+}
+
+// Generic dialog for cell db editor
+RESOURCE DIALOG r_dialog_misc_editstring
+{
+	title = "輸入名稱";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cString;
+			control = GTXTED 
+			{ 
+				height = 55; width = 150; numlines = 1; textlimit = 255; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd;
+			};
+		}
+	};
+}
+
+// Dialog for creating a new group
+RESOURCE DIALOG r_dialog_cellid_newgroup
+{
+	title = "新增群組";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cString;
+			control = GTXTED 
+			{ 
+				height = 55; width = 150; numlines = 1; textlimit = 255; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "啟動：";
+			id = cCheckBox;
+		}		
+	};
+}
+
+// Dialog for creating a new cell
+RESOURCE DIALOG r_dialog_cellid_newcell
+{
+	title = "Cell 說明";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "Cell 編號：";
+			id = cCellId;
+			control = QIK_NUMBER_EDITOR { min = 1; max = 0x7fffffff; };
+		},
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			prompt = "國家編號：";
+			id = cCountryCode;
+			control = GTXTED 
+			{ 
+				height = 22; width = 150; numlines = 1; flags = EEikEdwinJustAutoCurEnd; textlimit = 4;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			prompt = "網路編號：";
+			id = cNetworkCode;
+			control = GTXTED 
+			{ 
+				height = 22; width = 150; numlines = 1; flags = EEikEdwinJustAutoCurEnd; textlimit = 8;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			prompt = "說明：";
+			id = cCellDescription;
+			control = GTXTED
+			{ 
+				height = 55; width = 150; numlines = 1; textlimit = 50; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "群組：";
+			id = cCellGroups;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array; 
+			};
+		}
+	};
+}
+
+// Dialog for moving a bunch of cells to another group
+RESOURCE DIALOG r_dialog_cellid_movecell
+{
+	title = "選擇群組";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "群組：";
+			id = cCellGroups;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array; 
+			};
+		}
+	};
+}
+
+// Dialog for finding a new cell
+RESOURCE DIALOG r_dialog_cellid_findcell
+{
+	title = "找到 Cell";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "編號：";
+			id = cCellId;
+			control = QIK_NUMBER_EDITOR { min = 1; max = 0x7fffffff; };
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_foundcells
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "切換至"; }; flags=EEikLabeledButtonIsDefault; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "關閉"; }; }
+	};
+}
+
+// Dialog to display found cells
+RESOURCE DIALOG r_dialog_cellid_foundcell
+{
+	title = "搜尋結果";
+	buttons = r_buttons_foundcells;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "群組：";
+			type = EEikCtListBox;
+			id = cCellGroups;
+			control = LISTBOX
+			{
+				array_id = r_empty_array;
+				height = 6;
+			};
+		}
+	};
+}
+
+// The numbers at the end of the array represent the event_id that is stored in the
+// cell database. Do not change!! Note: number 4 cannot be used because it is reserved for
+// an unknown event type. The reason for this is because in our icon array for the columnlistbox,
+// icon index #4 (i.e. the 5th icon) is a special icon to indicate an unknown event type.
+// The 1st icon is for checkmark
+// The 2nd icon is for crossmark
+// The 3rd icon is for audio event
+// The 4th icon is for vibrate event
+// The 5th icon is for unknown event
+RESOURCE ARRAY r_event_type_array
+{
+	items=
+	{	
+		LBUF { txt="播放音效;0"; },
+		LBUF { txt="振動;1"; }
+	};	
+}
+
+// Number 4 cannot be used.
+//
+// The numbers in this array are the actual numbers that are stored in the database. However,
+// for indexing into the icon array, they are a continuation of the above list.
+//
+// The 6th icon is for enter trigger
+// The 7th icon is for leave trigger
+// The 8th icon is for both trigger
+RESOURCE ARRAY r_event_type_trigger
+{
+	items=
+	{	
+		LBUF { txt="進入;0"; },
+		LBUF { txt="離開;1"; },
+		LBUF { txt="進入與離開;2"; }
+	};	
+}
+
+// Dialog to select type of event to create
+RESOURCE DIALOG r_dialog_event_type_selection
+{
+	title = "指定事件";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "型式：";
+			id = cChoiceList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			prompt = "說明：";
+			id = cString;
+			control = GTXTED
+			{ 
+				height = 55; width = 150; numlines = 1; textlimit = 50; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "啟動：";
+			id = cCheckBox;
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "觸發：";
+			id = cTriggerList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array;
+			};
+		},		
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "群組：";
+			id = cCellGroups;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array;
+			};
+		}
+	};
+}
+
+// Dialog to create new audio event
+RESOURCE DIALOG r_dialog_event_audio
+{
+	title = "事件 - 播放音訊";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "音訊：";
+			id = cChoiceList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_array_audionotify;
+			};
+		}
+	};
+}
+
+// Dialog to edit audio event
+RESOURCE DIALOG r_dialog_event_edit_audio
+{
+	title = "事件 - 播放音訊";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			prompt = "說明：";
+			id = cString;
+			control = GTXTED
+			{ 
+				height = 55; width = 150; numlines = 1; textlimit = 50; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "觸發：";
+			id = cTriggerList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "音訊：";
+			id = cChoiceList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_array_audionotify;
+			};
+		}
+	};
+}
+
+// Dialog to edit vibration event
+RESOURCE DIALOG r_dialog_event_edit_vibrate
+{
+	title = "事件 - 振動";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			prompt = "說明：";
+			id = cString;
+			control = GTXTED
+			{ 
+				height = 55; width = 150; numlines = 1; textlimit = 50; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "觸發：";
+			id = cTriggerList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_event_type_trigger;
+			};
+		}
+	};
+}
+
+/*
+// Generic dialog to prompt for drive letter (RAM only)
+RESOURCE DIALOG r_dialog_prompt_drive_letter
+{
+	title = "選擇磁碟";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "磁碟：";
+			id = cChoiceList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array;
+			};
+		}
+	};
+}
+*/
+
+/*
+// List files to import
+RESOURCE DIALOG r_edit_cells_dialog_import
+{
+	title = "選擇檔案";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtListBox;
+			prompt = "匯入：";
+			id = cCellDBImportExportFileListBox;
+			control = LISTBOX 
+			{ 
+				array_id = r_empty_array;
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+			};
+		}
+	};
+}
+*/
+
+RESOURCE DIALOG r_dialog_cells_importexport_progress
+{
+	title = "進度";
+	buttons = R_EIK_BUTTONS_OK;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			prompt = "目前：";
+			id = cString;
+			control = GTXTED
+			{ 
+				height = 100; width = 150; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd | EEikEdwinReadOnly;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "進度：";
+			type = EEikCtProgInfo;
+			id = cProgressInfo;
+			control = PROGRESSINFO
+			{
+				text_type = EEikProgressTextPercentage;
+			};
+		}
+	};
+}
+
+// Debug dialog to fool sman into thinking it is running on a particular phone model
+#ifdef __DEBUG_BUILD__
+RESOURCE DIALOG r_dialog_debug
+{
+	title = "選擇手機型號";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "手機：";
+			id = cChoiceList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_phone_model_array;
+			};
+		}
+	};
+}
+#endif
+
+// For debug menu
+#ifdef __DEBUG_BUILD__
+RESOURCE ARRAY r_phone_model_array
+{
+	items=
+	{	
+		LBUF { txt="SonyEricsson P800"; },
+		LBUF { txt="SonyEricsson P900"; },
+		LBUF { txt="SonyEricsson P910"; },
+		LBUF { txt="Motorola A920"; },
+		LBUF { txt="Motorola A920(C)"; },
+		LBUF { txt="Motorola A925"; },
+		LBUF { txt="Motorola A925(C)"; },
+		LBUF { txt="BenQ P30"; },
+		LBUF { txt="<未知>"; }
+	};	
+}
+#endif
+
+RESOURCE DLG_BUTTONS r_buttons_bluejack_exclusionlist
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidAdd; button = CMBUT { txt = "新增"; }; },
+		DLG_BUTTON { id = EEikBidDel; button = CMBUT { txt = "刪除"; }; },
+		DLG_BUTTON { id = EEikBidEdit; button = CMBUT { txt = "編輯"; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "確定"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+// Edit bluejack exclusion list
+// List files to import
+RESOURCE DIALOG r_edit_bluejack_exclusionlist
+{
+	title = "藍芽裝置";
+	buttons = r_buttons_bluejack_exclusionlist;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtColListBox;
+			id = cListBox;
+			control = LISTBOX 
+			{ 
+				array_id = r_empty_array;
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				height = 6;
+			};
+		}
+	};
+}
+
+// Edit bt exclusion list device
+RESOURCE DIALOG r_dialog_bluejack_editdevice
+{
+	title = "編輯項目";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cString;
+			control = GTXTED 
+			{ 
+				height = 55; width = 150; numlines = 1; textlimit = 255; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_maxtodopriority_array
+{
+	items=
+	{	
+		LBUF { txt="全部"; },
+		LBUF { txt="1"; },
+		LBUF { txt="2"; },
+		LBUF { txt="3"; },
+		LBUF { txt="4"; },
+		LBUF { txt="5"; },
+		LBUF { txt="6"; },
+		LBUF { txt="7"; },
+		LBUF { txt="8"; },
+		LBUF { txt="9"; }
+	};	
+}
+
+// Set max todo priority to display in today view
+RESOURCE DIALOG r_dialog_agenda_maxtodopriority
+{
+	title = "重要性過濾";
+	buttons = r_buttons_ok_cancel;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "重要性：";
+			id = cChoiceList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_maxtodopriority_array;
+			};
+		}
+	};
+}
+
+/*
+RESOURCE DIALOG r_dialog_folder_selector
+{
+	title = "選擇資料夾";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtFolderNameSel;
+			prompt = "資料夾：";
+			id = cFolderSelector;
+			control = FILENAMESELECTOR 
+			{ 
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtDriveNameSel;
+			prompt = "磁碟：";
+			id = cDriveSelector;
+			control = DRIVENAMESELECTOR 
+			{ 
+			};
+		}
+	};
+}
+*/
+
+RESOURCE DIALOG r_dialog_cellarea_event_firing_delay
+{
+	title = "事件延遲";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "延遲 (分鐘)：";
+			id = cNumberEditor;
+			control = QIK_NUMBER_EDITOR { min = 0; max = 60; };
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_folder_file_browser
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidSelectAll; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderAll; bmpmask = EMbmMyheaderAllmask; }; },
+		DLG_BUTTON { id = EEikBidSelectNone; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderNone; bmpmask = EMbmMyheaderNonemask; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "取消"; }; },
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "確定"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_folder_file_browser
+{
+	title = "選擇資料夾";
+	buttons = r_buttons_folder_file_browser;
+	flags = EEikDialogFlagWait;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikTextListBoxWithPointerHandler;
+			id = cListBox;
+			control = LISTBOX
+			{
+				array_id = r_empty_array;
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				height = 6;
+			};
+		}
+	};
+}
+
+RESOURCE TBUF r_tbuf_unknownphonemessage { buf = "SMan has detected that it is running on a \
+phone it does not recognize. Please send the following information to*\
+- ajack (ajack2001my@yahoo.com); or*\
+- drollercoaster (drollercoaster@hotmail.com):**\
+1. Machine UID*\
+2. Manufacturer UID**\
+You can obtain this information from the SysInfo module in SMan.**\
+Thank you."; }
+
+RESOURCE DIALOG r_dialog_unknownphonedialog
+{
+	title = "Information";
+	buttons = R_EIK_BUTTONS_DONE;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cCreditsText;
+			control = GTXTED
+			{ 
+				width = 150; height = 150; numlines = 20; flags = EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinDisplayOnly;
+			};
+		}
+	};
+}

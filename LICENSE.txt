@@ -1,0 +1,15 @@
+You are free to use this source code in anyway whatsoever subject to the 
+following limitations:
+
+1) You cannot port this application to a Nokia platform. This includes 
+Series 60, Series 80 and any future UIs released by Nokia.
+
+2) If you do make changes to this application for re-release and / or use 
+portions of the released source code, you must give credit to the original 
+author and send an email with any relevant URL links (or if none exists, 
+other equivalent information should be provided) of your project / 
+application etc.
+
+3) You recognize and agree that by using the source code provided in its 
+verbatim form, there are likely to be errors / bugs inherent in it and the 
+author is not liable for any damage arising from such errors / bugs.

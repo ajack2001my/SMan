@@ -1,0 +1,3355 @@
+#include <eikon.rh>
+#include <uikon.hrh>
+#include <eikon.rsg>
+#include <qikon.rh>
+#include "sman.hrh"
+#include <quartz.mbg>
+
+NAME sman
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf=""; }
+
+RESOURCE EIK_APP_INFO
+{
+	menubar=r_memory_menubar;
+}
+
+RESOURCE MENU_PANE r_options_autostart_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdAutostartSMan; txt="SMan"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdAutostartOthers; txt="Andere"; flags = EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdAutostartActive; txt="Aktiviere"; }
+	};
+}
+
+RESOURCE MENU_PANE r_options_bluejack_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdNoDevicePause; txt="Timer"; },
+		MENU_ITEM { command=cmdLogFlags; txt="Prox. sweep logs"; },
+		MENU_ITEM { command=cmdBluejackSysMsg; txt="Benachrichtigungen";},
+		MENU_ITEM { command=cmdBluejackMsg; txt="Nachricht"; },
+		MENU_ITEM { command=cmdBluejackExcludeList; txt="Exclude List"; flags=EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdResolveName; txt="Namensauflösung"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdBluejackOnce; txt="Prox. sweep once"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdBluejackAutoSave; txt="Log auf Disk"; flags=EEikMenuItemCheckBox | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdZoom; txt = "Zoom"; }
+	};
+}
+
+RESOURCE MENU_PANE r_runapplist_menu
+{
+	items=
+	{
+	};
+}
+	
+RESOURCE MENU_PANE r_shortcuts_menu
+{
+	items=
+	{
+		MENU_ITEM { cascade=r_runapplist_menu; txt="Start"; },
+		MENU_ITEM { command=cmdShortcuts; txt="Zuordnung";  flags = EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdShort1; txt="<nicht zugeordnet>"; flags = EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdShort2; txt="<nicht zugeordnet>"; flags = EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdShort3; txt="<nicht zugeordnet>"; flags = EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdShort4; txt="<nicht zugeordnet>"; flags = EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdShort5; txt="<nicht zugeordnet>"; flags = EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdShort6; txt="<nicht zugeordnet>"; flags = EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdShort7; txt="<nicht zugeordnet>"; flags = EEikMenuItemDimmed; }
+	};
+}	
+
+RESOURCE ARRAY r_fn_array
+{
+	items=
+	{	
+		LBUF { txt="Taskmanager"; },
+		LBUF { txt="Dateimanager"; },
+		LBUF { txt="Bluejack"; },
+		LBUF { txt="InfoStore"; },
+		LBUF { txt="SysInfo"; },
+		LBUF { txt="Heute"; },
+		LBUF { txt="DTMF Dialer"; },
+		LBUF { txt="Netzwerk Info"; }
+	};	
+}
+
+RESOURCE DIALOG r_dialog_fn_options
+{
+	title = "Fn Verknüpfungen";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "Module:";
+			type = EEikCtListBox;
+			id = cFnModuleList;
+			control = LISTBOX
+			{
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				array_id = r_fn_array;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Autostart:";
+			id = cFnStartupView;
+			control = CHOICELIST { array_id = r_fn_array; };
+		}
+	};
+}	
+
+RESOURCE MENU_PANE r_modules_menu
+{
+	items =
+	{
+		MENU_ITEM { command=cmdSwitchMemory; txt="Taskmanager"; },
+		MENU_ITEM { command=cmdSwitchFile; txt="Dateianager"; },
+		MENU_ITEM { command=cmdSwitchSysInfo; txt="SysInfo"; },
+		MENU_ITEM { command=cmdSwitchBJack; txt="Bluejack"; },
+		MENU_ITEM { command=cmdSwitchDB; txt="InfoStore"; },
+		MENU_ITEM { command=cmdSwitchAgenda; txt="Heute"; },
+		MENU_ITEM { command=cmdSwitchDTMFDialer; txt="DTMF Dialer"; },
+		MENU_ITEM { command=cmdSwitchCellArea; txt="Netzwerk Info"; }
+	};
+}
+	
+RESOURCE MENU_PANE r_generic_fn
+{
+	items =
+	{
+	   	MENU_ITEM { cascade=r_shortcuts_menu; txt="Start"; },
+	   	MENU_ITEM { cascade=r_modules_menu; txt="Module"; },
+		MENU_ITEM { cascade=r_fn_utilities_menu; txt="Zubehör"; },
+		MENU_ITEM { cascade=r_controlpanel_menu; txt="Systemsteuerung"; flags=EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { cascade=r_fn_options_menu; txt="Optionen"; },
+		MENU_ITEM { command=cmdAbout; txt="Über"; },
+		MENU_ITEM { command=cmdQuit; txt="Beenden"; }
+	};
+}
+
+RESOURCE MENU_PANE r_fn_options_menu
+{
+	items = 
+	{
+		MENU_ITEM { command=cmdSwitchOptions; txt="Navigation"; flags=EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdHotkey; txt="Hotkey"; },
+		MENU_ITEM { command=cmdNoHotkey; txt="Deaktiviere Hotkey"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdPersist; txt="Ignoriere \"Harakiri\""; flags=EEikMenuItemCheckBox; }
+	};
+}
+
+RESOURCE MENU_PANE r_sysinfo_options
+{
+	items=
+	{
+		MENU_ITEM { command=cmdSysInfoRefresh; txt="Aktualisiere"; },
+		MENU_ITEM { command=cmdZoom; txt="Zoom"; }
+	};
+}
+
+RESOURCE MENU_PANE r_controlpanel_menu
+{
+	items =
+	{
+		MENU_ITEM { command=cmdCPBluetooth; txt="Bluetooth"; },
+		MENU_ITEM { command=cmdCPIrda; txt="IrDA"; },
+		MENU_ITEM { command=cmdCPPhone; txt="Telefon"; },
+		MENU_ITEM { command=cmdControlPanel; txt="Andere"; }
+	};
+}
+
+RESOURCE MENU_PANE r_bluejacklog_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdBluejackClearLog; txt="Lösche mem. log"; },
+		MENU_ITEM { cascade=r_bluejack_filelog_menu; txt="Datei log"; }
+	};
+}
+
+RESOURCE MENU_PANE r_bluejack_filelog_menu
+{
+	items =
+	{
+		MENU_ITEM { command=cmdBluejackViewFileLog; txt="Ansicht"; },
+		MENU_ITEM { command=cmdBluejackDelFileLog; txt="Löschen"; }
+	};
+}
+
+
+RESOURCE MENU_PANE r_extras_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdFlipFlush; txt="beim Flipclose spülen"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdForceEndTask; txt="Erzwinge Endtask"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdFlushExclude; txt = "Spülen mit Ausschluß"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdShowHiddenTask; txt="Zeige versteckte Tasks"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdZoom; txt = "Zoom"; }
+	};
+}
+
+RESOURCE MENU_BAR r_db_menubar
+{
+	titles=
+   	{
+		MENU_TITLE { menu_pane=r_db_options; txt="Optionen"; },
+		MENU_TITLE { menu_pane=r_edit; txt="Ändern"; },
+		MENU_TITLE { menu_pane=r_db_data; txt="Data"; },
+		MENU_TITLE { menu_pane=r_generic_fn; txt="Fn"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE MENU_BAR r_sysinfo_menubar
+{
+	titles=
+   	{
+		MENU_TITLE { menu_pane=r_sysinfo_options; txt="Optionen"; },
+		MENU_TITLE { menu_pane=r_generic_fn; txt="Fn"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE MENU_PANE r_edit
+{
+	items=
+	{
+		MENU_ITEM { command=cmdEditCut; txt="Ausschneiden"; flags=EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdEditCopy; txt="Kopieren"; flags=EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdEditPaste; txt="Einfügen"; flags=EEikMenuItemDimmed; }
+	};
+}
+
+RESOURCE MENU_PANE r_db_options
+{
+	items=
+	{
+		MENU_ITEM { command=cmdDBReadDB; txt="Öffne DB"; },
+		MENU_ITEM { command=cmdDBCloseDB; txt="Schließe DB"; flags=EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdDBChangePassword; txt="Ändere Password"; },
+		MENU_ITEM { command=cmdDBReInit; txt="Re-init DB"; },
+		MENU_ITEM { command=cmdDBUpdateStats; txt="Update Statistik"; },
+		MENU_ITEM { command=cmdDBCompact; txt="Kompakt"; flags=EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdDBSortAsc; txt = "Sortiere aufsteigend"; flags = EEikMenuItemRadioStart; },
+		MENU_ITEM { command=cmdDBSortDes; txt = "Sortiere absteigend"; flags = EEikMenuItemRadioEnd | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdZoom; txt="Zoom"; }
+	};
+}
+
+RESOURCE MENU_PANE r_db_data
+{
+	items=
+	{
+		MENU_ITEM { command=cmdDBExportDB; txt="Exportiere DB"; },
+		MENU_ITEM { command=cmdDBImportDB; txt="Importiere DB"; }
+	};
+}
+
+RESOURCE MENU_PANE r_fc_bluejack_menu
+{
+	items=
+	{
+		MENU_ITEM { cascade=r_fc_moduleswitch_menu; command=cmdFCSwitchMenu; txt="Module"; },
+		MENU_ITEM { command=cmdFlushOut; txt="Prozesse spülen"; },
+		MENU_ITEM { command=cmdUtilsFixApplist; txt="Repariere Appliste";  flags=EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdBluejack; txt="Starte Proximity sweep"; },
+		MENU_ITEM { command=cmdBluejackClearLog; txt="Lösche memory log"; }
+	};	
+}
+
+RESOURCE MENU_BAR r_bluejack_menubar
+{
+	titles=
+   	{
+	   	MENU_TITLE { menu_pane=r_options_bluejack_menu; txt="Optionen"; },
+	   	MENU_TITLE { menu_pane=r_bluejacklog_menu; txt="Log"; },
+		MENU_TITLE { menu_pane=r_generic_fn; txt="Fn"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE MENU_BAR r_memory_menubar
+{
+	titles=
+   	{
+	   	MENU_TITLE { menu_pane=r_extras_menu; txt="Optionen"; },
+		MENU_TITLE { menu_pane=r_generic_fn; txt="Fn"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_autostart
+{
+	title = "Autostart";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Anwendung 1:";
+			id = cAutoStart1;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Anwendung 2:";
+			id = cAutoStart2;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Anwendung 3:";
+			id = cAutoStart3;
+			control = CHOICELIST { };
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_nodevicepause
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "Standard"; }; },
+		DLG_BUTTON { id = EEikBidCancel; button = CMBUT { txt = "Abbrechen"; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "Ok"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_loglevels
+{
+	title = "Prox. Sweep Logs";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait | EEikDialogFlagButtonsRight;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "Log Bluejack:";
+			id = cLogBluejack;
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "Log OBEX:";
+			id = cLogOBEX;
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "Log Scannen:";
+			id = cLogScanning;
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "Log Decay:";
+			id = cLogDecays;
+		}
+	};
+}
+
+RESOURCE ARRAY r_array_audionotify
+{
+	items=
+	{	
+		LBUF { txt="Keine"; },
+		LBUF { txt="Wähle Datei"; }
+	};	
+}
+
+RESOURCE DIALOG r_dialog_notification
+{
+	title = "Bluejack Benachrichtigung";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "Nachricht:";
+			id = cSystemMsgNotify;
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "Vibrieren:";
+			id = cVibraNotify;
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Töne:";
+			id = cAudioFileName;
+			control = CHOICELIST { };
+		}			
+	};
+}
+
+RESOURCE DIALOG r_dialog_nodevicepause
+{
+	title = "Bluejack Timer";
+	buttons = r_buttons_nodevicepause;
+	flags = EEikDialogFlagWait;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "OBEX timeout (Sek):";
+			id = cOBEXTimeout;
+			control = QIK_NUMBER_EDITOR { min = 10; max = 30; };
+		},
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "Decay (Sek):";
+			id = cDecayTime;
+			control = QIK_NUMBER_EDITOR { min = 5; max = 1800; };
+		},
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "Cool-off (Sek):";
+			id = cNoDevicePause;
+			control = QIK_NUMBER_EDITOR { min = 1; max = 1800; };
+		},
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "fehlgeschlagene Versuche:";
+			id = cNoDeviceAttempts;
+			control = QIK_NUMBER_EDITOR { min = 1; max = 10; };
+		}			
+	};
+}
+			
+RESOURCE DIALOG r_dialog_shortcut
+{
+	title = "Start";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait | EEikDialogFlagButtonsRight;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "1:";
+			id = cShortcut1;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "2:";
+			id = cShortcut2;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "3:";
+			id = cShortcut3;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "4:";
+			id = cShortcut4;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "5:";
+			id = cShortcut5;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "6:";
+			id = cShortcut6;
+			control = CHOICELIST { };
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "7:";
+			id = cShortcut7;
+			control = CHOICELIST { };
+		}
+	};
+}
+
+RESOURCE ARRAY r_hotkey_array_p800_p900
+{
+	items=
+	{	
+		LBUF { txt="<Deaktiviert>"; },
+		LBUF { txt="Cam"; },
+		LBUF { txt="Internet"; },
+		LBUF { txt="Flip Offen"; }
+	};	
+}
+
+RESOURCE ARRAY r_hotkey_array_a920_a925
+{
+	items=
+	{	
+		LBUF { txt="<Deaktiviert>"; },
+		LBUF { txt=" Verknüpfung"; },
+		LBUF { txt="Browser"; },
+		LBUF { txt="<Unbenutzt>"; }
+	};	
+}
+
+// The number after the semi-colon is the shortcut number that is stored in sman's config file
+// By doing it this way, we can insert any arbitrary item in the middle and have it sorted in
+// alphabetical order for the user to easily locate whatever he / she wants and still not worry
+// about the value stored in the config file being wrong
+RESOURCE ARRAY r_hotkey_choices_fo
+{
+	items =
+	{
+		LBUF { txt = "<Deaktiviert>;0"; },
+		LBUF { txt = "Autostart Andere;1"; },
+		LBUF { txt = "Autostart SMan umschalten;2"; },
+		LBUF { txt = "Autostart umschalten;3"; },
+		LBUF { txt = "Control Bluetooth;4"; },
+		LBUF { txt = "Control IrDA;5"; },
+		LBUF { txt = "Control Panel;6"; },
+		LBUF { txt = "Control Telefon;7"; },
+		LBUF { txt = "Verschiedene Prozesse spülen;8"; },
+		LBUF { txt = "Verschiedene Navigation;9"; },
+		LBUF { txt = "Zubehör komprimiere Applist;11"; },
+		LBUF { txt = "Zubehör repariere synch Zeitzone;12"; },
+		LBUF { txt = "Zubehör setze System Schriftart;13"; },
+		LBUF { txt = "Zeige Bluejack;14"; },
+		LBUF { txt = "Zeige DTMF Dialer;15"; },
+		LBUF { txt = "Zeige Dateimanager;16"; },
+		LBUF { txt = "Zeige InfoStore;17"; },
+		LBUF { txt = "Zeige Netzwerk Info;18"; },
+		LBUF { txt = "Zeige System Info;19"; },
+		LBUF { txt = "Zeige Taskmanager;20"; },
+		LBUF { txt = "Zeige Heute Ansicht;21"; }
+	};
+}
+
+// Note: These numbers MUST match the flip open counterpart. Only if there is specific 
+// functionality to either FO or FC mode will there be differences; in that event, the numbers
+// MUST be UNIQUE across the FO + FC modes
+RESOURCE ARRAY r_hotkey_choices_fc
+{
+	items =
+	{
+		LBUF { txt = "<Deaktiviere>;0"; },
+		LBUF { txt = "Autostart SMan umschalten;2"; },
+		LBUF { txt = "Autostart umschalten;3"; },
+		LBUF { txt = "Verschiedene Prozesse spülen;8"; },
+		LBUF { txt = "Verschiedene Navigation;9"; },
+		LBUF { txt = "Zubehör komprimiere Kontakte;10"; },
+		LBUF { txt = "Zubehör repariere Applist;11"; },
+		LBUF { txt = "Zeige Bluejack;14"; },
+		LBUF { txt = "Zeige Netzwerkinfo;18"; }
+	};
+}
+
+RESOURCE ARRAY r_dialog_hotkey_pages_key
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Hotkeyb:";
+			id = cHotkeyControl;
+			control = CHOICELIST 
+			{
+				array_id = r_hotkey_array_p800_p900;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_hotkey_pages_fo
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "In-Focus Short:";
+			id = cHotkeyInFocusShortFO;
+			control = CHOICELIST {};
+		},		
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "In-Focus Long:";
+			id = cHotkeyInFocusLongFO;
+			control = CHOICELIST {};
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Ex-focus Short:";
+			id = cHotkeyExFocusShortFO;
+			control = CHOICELIST {};
+		},		
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Ex-focus Long:";
+			id = cHotkeyExFocusLongFO;
+			control = CHOICELIST {};
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_hotkey_pages_fc
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "In-Focus Short:";
+			id = cHotkeyInFocusShortFC;
+			control = CHOICELIST {};
+		},		
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "In-Focus Long:";
+			id = cHotkeyInFocusLongFC;
+			control = CHOICELIST {};
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Ex-focus Short:";
+			id = cHotkeyExFocusShortFC;
+			control = CHOICELIST {};
+		},		
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Ex-focus Long:";
+			id = cHotkeyExFocusLongFC;
+			control = CHOICELIST {};
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_hotkey_pages
+{
+	items = 
+	{	
+		PAGE
+		{
+			id = idHotkeyPage_Hotkey;
+			text = "Taste";
+			lines = r_dialog_hotkey_pages_key;
+		},
+		PAGE
+		{
+			id = idHotkeyPage_FO;
+			text = "FlipOpen";
+			lines = r_dialog_hotkey_pages_fo;
+		},
+		PAGE
+		{
+			id = idHotkeyPage_FC;
+			text = "FlipClose";
+			lines = r_dialog_hotkey_pages_fc;
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_hotkey
+{
+	title = "Hotkey Konfiguration";
+	flags = EEikDialogFlagWait;
+	pages = r_dialog_hotkey_pages;
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+}
+
+RESOURCE DLG_BUTTONS r_buttons_continue_credits
+{
+	buttons =
+	{
+		#ifdef __DEBUG_BUILD__
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "Debug"; }; },
+		#endif
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "Credits"; }; },
+		DLG_BUTTON { id = EEikBidCancel; button = CMBUT { txt = "Weiter"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_about
+{
+	title = "Über";
+	buttons = r_buttons_continue_credits;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtLabel;
+			control = LABEL 
+			{
+				txt="The S Manager (c) 2003,2004";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtLabel;
+			control = LABEL 
+			{
+				txt="v1.3c, Build 202";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtLabel;
+			control = LABEL 
+			{
+				txt="Coding by Yip Je Sum / droll";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtLabel;
+			control = LABEL 
+			{
+				txt="Design by Adrian Chiang / ajack";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtLabel;
+			control = LABEL 
+			{
+				txt="http://renegade.w3xs.com";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_snapshotconfirm
+{
+	title = "Bestätige Snapshot";
+	buttons = R_EIK_BUTTONS_NO_YES;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtLabel;
+			control = LABEL
+			{
+				txt = "sind sie sicher, dass sie einen Snapshot machen wollen?";
+			};
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_bluebeamlog
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "Abbrechen"; }; },
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "Ok"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_bluebeamlog
+{
+	title = "Beamer Log";
+	buttons = r_buttons_bluebeamlog;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikCtRichTextEditor;
+			id = cBluebeamLog;
+			control = RTXTED 
+			{ 
+				width = 150; height = 170; numlines = 10; flags = EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinJustAutoCurEnd | EEikEdwinDisplayOnly;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_bluejacklog
+{
+	title = "Bluejack Log";
+	buttons = R_EIK_BUTTONS_OK;
+	flags=EEikDialogFlagWait;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikCtRichTextEditor;
+			id = cBluejackLog;
+			control = RTXTED 
+			{ 
+				width = 150; height = 170; numlines = 10; flags = EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinJustAutoCurEnd | EEikEdwinDisplayOnly;
+			};
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_filemanprogress
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidOverwrite; button = CMBUT { txt = "Überschreiben"; }; },
+		DLG_BUTTON { id = EEikBidOverwriteAll; button = CMBUT { txt = "Alles Überschreiben"; }; },
+		DLG_BUTTON { id = EEikBidSkip; button = CMBUT { txt = "Überspringen"; }; flags=EEikLabeledButtonIsDefault; },
+		DLG_BUTTON { id = EEikBidSkipAll; button = CMBUT { txt = "Alles Überspringen"; }; },
+		DLG_BUTTON { id = EEikBidAbort; button = CMBUT { txt = "Abbruch"; }; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_filemanprogress_nowait
+{
+	title = "Dateimanager";
+	buttons = r_buttons_filemanprogress;
+	flags = EEikDialogFlagNoDrag;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikCtRichTextEditor;
+			id = cFileManProgressText;
+			control = RTXTED 
+			{ 
+				width = 150; height = 100; numlines = 10; flags = EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinJustAutoCurEnd | EEikEdwinDisplayOnly;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "Aktuell ";
+			type = EEikCtProgInfo;
+			id = cFileManProgressBar;
+			control = PROGRESSINFO
+			{
+				text_type = EEikProgressTextPercentage;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_filemanprogress_wait
+{
+	title = "Dateimanager";
+	buttons = r_buttons_filemanprogress;
+	flags = EEikDialogFlagWait | EEikDialogFlagNoDrag;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtRichTextEditor;
+			id = cFileManProgressText;
+			control = RTXTED 
+			{ 
+				width = 150; height = 100; numlines = 10; flags = EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinJustAutoCurEnd | EEikEdwinDisplayOnly;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "Aktuell ";
+			type = EEikCtProgInfo;
+			id = cFileManProgressBar;
+			control = PROGRESSINFO
+			{
+				text_type = EEikProgressTextPercentage;
+			};
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_filemanrename
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidAbort; button = CMBUT { txt = "Abbrechen"; }; },
+		DLG_BUTTON { id = EEikBidSkip; button = CMBUT { txt = "Überspringen"; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "Ok"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_filemanrename
+{
+	title = "Umbenennen";
+	buttons = r_buttons_filemanrename;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cFileManNewName;
+			control = GTXTED 
+			{ 
+				height = 22; width = 21; numlines = 1; flags = EEikEdwinJustAutoCurEnd; textlimit = 256;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_filemannewfolder
+{
+	title = "Neues Verzeichnis";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cFileManNewName;
+			control = GTXTED 
+			{ 
+				height = 22; width = 21; numlines = 1; flags = EEikEdwinJustAutoCurEnd;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_bluejack_vcard
+{
+	title = "Bluejack Mitteilung";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cBluejackMessage;
+			control = GTXTED 
+			{ 
+				textlimit = 20; height = 22; width = 21; numlines = 1; flags = EEikEdwinJustAutoCurEnd;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_filemanatt
+{
+	title = "Datei Attribute";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cFileAttName;
+			control = GTXTED 
+			{ 
+				height = 70; width = 150; numlines = 10; flags = EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinDisplayOnly;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "nur lesen:";
+			id = cFileAttReadOnly;
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "Archiv:";
+			id = cFileAttArchive;
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "System:";
+			id = cFileAttSystem;
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "Versteckt:";
+			id = cFileAttHidden;
+		},
+/*		
+		DLG_LINE
+		{
+			type = EQikCtDateEditor;
+			prompt = "Datum:";
+			id = cFileModifiedDateTime;
+			control = QIK_DATE_EDITOR
+			{
+				minDate = DATE
+				{
+					day = 0;
+					month = 0;
+					year = 1900;
+				};
+				maxDate = DATE
+				{
+					day = 30;
+					month = 11;
+					year = 2999;
+				};
+			};
+		}
+*/		
+		DLG_LINE
+		{
+			type = EQikCtTimeAndDateEditor;
+			prompt = "Verändert:";
+			id = cFileModifiedDateTime;
+			control = QIK_TIME_AND_DATE_EDITOR
+			{
+				minTimeAndDate = TIME_AND_DATE
+				{
+					minute = 0;
+					hour = 0;
+					day = 0;
+					month = 0;
+					year = 1900;
+				};
+				maxTimeAndDate = TIME_AND_DATE
+				{
+					minute = 59;
+					hour = 23;
+					day = 30;
+					month = 11;
+					year = 2999;
+				};
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_fileman_crc
+{
+	title = "CRC Rechner";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	items=
+	{
+		DLG_LINE
+		{
+			prompt = "Datei:";
+			type = EEikCtLabel;
+			id = cCRCFileName;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "CRC:";
+			type = EEikCtLabel;
+			id = cCRCValue;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "Fortschritt:";
+			type = EEikCtProgInfo;
+			id = cCRCProgress;
+			control = PROGRESSINFO
+			{
+				text_type = EEikProgressTextPercentage;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_db_getpassword
+{
+	title = "Authentifizierung erforderlich";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtSecretEd;
+			prompt = "Passwort:";
+			id = cDBPassword;
+			control = SECRETED
+			{
+				num_letters = 16;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_db_changepassword
+{
+	title = "Ändere Passwort";
+	buttons = R_EIK_BUTTONS_CANCEL_OK;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtSecretEd;
+			prompt = "Passworteingabe:";
+			id = cDBPassword;
+			control = SECRETED
+			{
+				num_letters = 16;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtSecretEd;
+			prompt = "Bestätige Passwort:";
+			id = cDBPasswordReEnter;
+			control = SECRETED
+			{
+				num_letters = 16;
+			};
+		}		
+	};
+}
+
+RESOURCE DIALOG r_dialog_db_compress
+{
+	title = "Bitte warten";
+	items=
+	{
+		DLG_LINE
+		{
+			prompt = "Fortschritt:";
+			type = EEikCtProgInfo;
+			id = cDBCompactProgress;
+			control = PROGRESSINFO
+			{
+				text_type = EEikProgressTextPercentage;
+			};
+		}
+	};
+}
+
+RESOURCE MENU_BAR r_file_menubar
+{
+	titles=
+   	{
+	   	MENU_TITLE { menu_pane = r_file_options_menu; txt="Optionen";},
+	   	MENU_TITLE { menu_pane = r_file_drives_menu; txt="Laufwerke";},
+		MENU_TITLE { menu_pane = r_generic_fn; txt="Fn"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE MENU_PANE r_file_options_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdFileMan_Bluetooth; txt="Bluetooth"; flags=EEikMenuItemRadioStart; },
+		MENU_ITEM { command=cmdFileMan_IrDA; txt="IrDA"; flags=EEikMenuItemRadioEnd | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { cascade=r_file_sort_menu; txt="Sortiere"; },
+		MENU_ITEM { command=cmdFileManToggleHiddenView; txt="Zeige Versteckte"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdFileManToggleRunApp; txt="Auto starten App"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdFileManToggleOpenFile; txt="Auto öffnen Datei"; flags=EEikMenuItemCheckBox | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdZoom; txt="Zoom"; }
+	};
+}
+
+RESOURCE MENU_PANE r_file_sort_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdFileMan_SortName; txt="Sortiere nach Name"; flags=EEikMenuItemRadioStart; },
+		MENU_ITEM { command=cmdFileMan_SortDate; txt="Sortiere nach Datum"; flags=EEikMenuItemRadioMiddle; },
+		MENU_ITEM { command=cmdFileMan_SortSize; txt="Sortiere nach Größe"; flags=EEikMenuItemRadioEnd | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdFileMan_SortAsc; txt="Sortiere aufteigend"; flags=EEikMenuItemRadioStart; },
+		MENU_ITEM { command=cmdFileMan_SortDesc; txt="Sortiere absteigend"; flags=EEikMenuItemRadioEnd; }
+	};
+}
+
+RESOURCE MENU_PANE r_file_drives_menu
+{
+	items=
+	{
+	};
+}
+
+RESOURCE MENU_PANE r_fileman_dobutton
+{
+	items=
+	{
+		MENU_ITEM { command=cmdFileManBeam; txt="Senden"; },
+		MENU_ITEM { command=cmdFileManCut; txt="Ausschneiden"; },
+		MENU_ITEM { command=cmdFileManCopy; txt="Kopieren"; },
+		MENU_ITEM { command=cmdFileManPaste; txt="Einfügen"; },
+		MENU_ITEM { command=cmdFileManRename; txt="Umbenennen"; },
+		MENU_ITEM { command=cmdFileManDelete; txt="Löschen"; flags = EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdFileManCRC; txt="Berechne CRC"; },
+		MENU_ITEM { command=cmdFileManProperties; txt="Eigenschaften"; },
+		MENU_ITEM { command=cmdFileManOpenOverride; txt="Öffnen"; },
+		MENU_ITEM { command=cmdFileManCopyAs; txt="Dupluzieren"; },
+		MENU_ITEM { command=cmdFileManHexEdit; txt="Hexedit"; }
+	};
+}
+
+RESOURCE MENU_PANE r_db_dobutton
+{
+	items=
+	{
+		MENU_ITEM { command=cmdDBDel; txt="Löschen"; flags = EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdDBAdd; txt="Hinzufügen"; },
+		MENU_ITEM { command=cmdDBEdit; txt="Ändern"; },
+		MENU_ITEM { command=cmdDBView; txt="Ansicht"; },
+		MENU_ITEM { command=cmdDBSave; txt="Speichern"; }	
+	};
+}
+
+RESOURCE QIK_TOOLBAR r_toolbar_db_list
+{
+	height = EQikToolbarHeight - 4;
+	controls = 
+	{
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdDBDo;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderDobutton;
+			bmpmask = EMbmMyHeaderDobuttonmask;
+			alignment = EQikToolbarRight;
+		}
+	};
+}
+
+RESOURCE QIK_TOOLBAR r_toolbar_db_single
+{
+	height = EQikToolbarHeight - 4;
+	controls = 
+	{
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdDBBack;
+			bmpfile = "Z:\\SYSTEM\\DATA\\QUARTZ.MBM";
+			bmpid = EMbmQuartzBackarrow;
+			bmpmask = EMbmQuartzBackarrowmask;
+		},		
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdDBDo;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderDobutton;
+			bmpmask = EMbmMyHeaderDobuttonmask;
+			alignment = EQikToolbarRight;
+		}
+	};
+}
+
+RESOURCE QIK_TOOLBAR r_toolbar_bluejack
+{
+	controls = 
+	{
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdBluejack;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderBjackproximity;
+			bmpmask = EMbmMyheaderBjackproximity;
+		},
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdBluejackOne;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderBjackindividual;
+			bmpmask = EMbmMyheaderBjackindividual;
+		},
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdBluejackStop;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderBjackstop;
+			bmpmask = EMbmMyheaderBjackstopmask;
+		}
+	};
+}
+
+RESOURCE QIK_TOOLBAR r_toolbar_fileman
+{
+	height = EQikToolbarHeight - 4;
+	controls = 
+	{
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdFileManAll;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderAll;
+			bmpmask = EMbmMyheaderAllmask;
+		},
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdFileManNone;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderNone;
+			bmpmask = EMbmMyheaderNonemask;
+		},
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdFileManNewFolder;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderNewfolder;
+			bmpmask = EMbmMyheaderNewfoldermask;
+		},
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdFileManReload;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderReload;
+			bmpmask = EMbmMyheaderReloadmask;
+		},
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdFileManFindFile;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderFindfile;
+			bmpmask = EMbmMyheaderFindfilemask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdDoButton;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderDobutton;
+			bmpmask = EMbmMyHeaderDobuttonmask;
+			alignment = EQikToolbarRight;
+		}
+	};
+}
+
+RESOURCE ARRAY r_array_db_fieldname
+{
+	items=
+	{
+		LBUF { txt="Benutzername"; },
+		LBUF { txt="Passwort"; },
+		LBUF { txt="PIN"; },
+		LBUF { txt="Kartennummer"; },
+		LBUF { txt="Kartentyp"; },
+		LBUF { txt="Ablauf Datum"; }
+	};
+}
+
+RESOURCE TBUF r_tbuf_applistfixed { buf = "Applist repariert"; }
+RESOURCE TBUF r_tbuf_errlaunchapp { buf = "Fehler beim starten der Anwendung"; }
+RESOURCE TBUF r_tbuf_errsaveconfig { buf = "Feler beim speichern der Konfiguration"; }
+RESOURCE TBUF r_tbuf_errsavesnapshot { buf = "Fehler beim speichern vom Snapshot";}
+RESOURCE TBUF r_tbuf_hotkeydisabled { buf = "Hotkey deaktiviert"; }
+RESOURCE TBUF r_tbuf_hotkeyenabled { buf = "Hotkey aktiviert"; }
+RESOURCE TBUF r_tbuf_nomarkedtasks { buf = "Keine ausgwählten Tasks";}
+RESOURCE TBUF r_tbuf_noprevsnapshot { buf = "Kein Snapshot zum laden";}
+RESOURCE TBUF r_tbuf_nosnapshot { buf = "Kein Snapshot geladen";}
+RESOURCE TBUF r_tbuf_scannerstopping { buf = "Scanner beim beenden. Bitte warten"; }
+RESOURCE TBUF r_tbuf_snapshotloaded { buf = "Snapshot geladen";}
+RESOURCE TBUF r_tbuf_snapshotupdated { buf = "Snapshot aktualisiert";}
+RESOURCE TBUF r_tbuf_stopbeam { buf = "Bitte warten bis senden beendet."; }
+RESOURCE TBUF r_tbuf_stopscanner { buf = "Bitte Scanner deaktivieren"; }
+RESOURCE TBUF r_tbuf_tasksflushed { buf = "Tasks gespült";}
+RESOURCE TBUF r_tbuf_validating { buf = "Überprüfe..."; }
+
+//RESOURCE TBUF r_tbuf_beamer_busy { buf = "Beamer beschäftigt. Bitte warten"; }
+RESOURCE TBUF r_tbuf_beamer_cancelled { buf = "Dateisenden abgebrochen"; }
+RESOURCE TBUF r_tbuf_beamer_fileopenerr { buf = "Konnte Datei nicht öffnen "; }
+RESOURCE TBUF r_tbuf_beamer_irdahrerr { buf = "IrDA RHostResolver Fehler!"; }
+RESOURCE TBUF r_tbuf_beamer_irdamissing { buf = "IrDA Treiber fehlt!"; }
+RESOURCE TBUF r_tbuf_beamer_irdanodevice { buf = "Kein Remote Gerät gefunden."; }
+RESOURCE TBUF r_tbuf_beamer_obexconnect { buf = "Verbinde..."; }
+RESOURCE TBUF r_tbuf_beamer_obexconnecterr { buf = "OBEX Verbindungsfehler."; }
+RESOURCE TBUF r_tbuf_beamer_obexdisconnect { buf = "Beendet. Verbindungsabbau..."; }
+RESOURCE TBUF r_tbuf_beamer_obexdisconnecterr { buf = "Fehler Verbindungsabbau. Abgebrochen."; }
+RESOURCE TBUF r_tbuf_beamer_obexputerr { buf = "OBEX PUT Fehler. Verbindungsabbau..."; }
+RESOURCE TBUF r_tbuf_beamer_obexretry { buf = "OBEX Suchen Fehler. Wiederhole."; }
+RESOURCE TBUF r_tbuf_beamer_obexsearch { buf = "OBEX Suche"; }
+RESOURCE TBUF r_tbuf_beamer_obexsearcherr { buf = "OBEX lookup Fehler. Abbruch."; }
+RESOURCE TBUF r_tbuf_beamer_sending { buf = "Sende "; }
+RESOURCE TBUF r_tbuf_beamer_skipfolder { buf = "Überspringe Verzeichnis "; }
+
+RESOURCE TBUF r_tbuf_bjackbtdisabled { buf = "Bluetooth nicht aktiviert!"; }
+RESOURCE TBUF r_tbuf_bjackbtlinkmissing { buf = "BT Link Manager fehlt!"; }
+RESOURCE TBUF r_tbuf_bjackbusy { buf = "Bluejack module beschäftigt"; }
+RESOURCE TBUF r_tbuf_bjackcached { buf = "Gerät im Cache gefunden."; }
+RESOURCE TBUF r_tbuf_bjackcachedecay { buf = "Gerät im Cache gefunden. Warte auf Verfall."; }
+RESOURCE TBUF r_tbuf_bjackcachefull { buf = "Gerät gefunden (Cache ist voll)"; }
+RESOURCE TBUF r_tbuf_bjackcachefullskip { buf = "Gerätepuffer ist voll. Überspringe."; }
+RESOURCE TBUF r_tbuf_bjackcooloff { buf = "Stack cool off"; }
+RESOURCE TBUF r_tbuf_bjackerr { buf = "Bluejack Fehler "; }
+RESOURCE TBUF r_tbuf_bjackerrsavelog { buf = "Fehler beim speichern von bluesweep log"; }
+RESOURCE TBUF r_tbuf_bjackerrvcard { buf = "Konnt VCard nicht öffnen"; }
+RESOURCE TBUF r_tbuf_bjackfounddevice { buf = "Gerät gefunden"; }
+RESOURCE TBUF r_tbuf_bjacklogmissing { buf = "Konnte Log Datei nicht finden"; }
+RESOURCE TBUF r_tbuf_bjackmsgsaved { buf = "Nachricht gespeichert"; }
+RESOURCE TBUF r_tbuf_bjackmsgtoolong { buf = "maximal 20 Zeichen"; }
+RESOURCE TBUF r_tbuf_bjacknodevices { buf = "Keine weiteren Geräte gefunden"; }
+RESOURCE TBUF r_tbuf_bjackobexconnerr { buf = "OBEX Verbindungsfehler"; }
+RESOURCE TBUF r_tbuf_bjackobexfound { buf = "OBEX gefunden"; }
+RESOURCE TBUF r_tbuf_bjackobexput { buf = "OBEX Put"; }
+RESOURCE TBUF r_tbuf_bjackobexsearcherr { buf = "OBEX suchen Fehler "; }
+RESOURCE TBUF r_tbuf_bjackscannerstarted { buf = "Scanner gestartet"; }
+RESOURCE TBUF r_tbuf_bjackscannerterminated { buf = "Scanner beendet"; }
+RESOURCE TBUF r_tbuf_bjackscannerterminating { buf = "Beende Scanner. Bitte warten."; }
+RESOURCE TBUF r_tbuf_bjackscanning { buf = "Scanne..."; }
+RESOURCE TBUF r_tbuf_bjacksuccess { buf = "Bluejacked!"; }
+RESOURCE TBUF r_tbuf_bjacktimeout { buf = "Timeout..."; }
+
+RESOURCE TBUF r_tbuf_fileman_confirm_delete { buf = "Soll dies wirklich alles gelöscht werden?"; }
+RESOURCE TBUF r_tbuf_fileman_copy { buf = "%d Teil(e) kopiert"; }
+RESOURCE TBUF r_tbuf_fileman_crccancelled { buf = "CRC Operation abgrbrochen"; }
+RESOURCE TBUF r_tbuf_fileman_cut { buf = "%d Teil(e) ausgeschnitten"; }
+RESOURCE TBUF r_tbuf_fileman_errmkdir { buf = "Fehler beim erstellen des Verzeichnisses"; }
+RESOURCE TBUF r_tbuf_fileman_errreadattr { buf = "Fehler beim lesen der Dateiattribute"; }
+RESOURCE TBUF r_tbuf_fileman_errreadfolder { buf = "Fehler beim lesen des Verzeichnisses"; }
+RESOURCE TBUF r_tbuf_fileman_errrename { buf = "Fehler beim umbenennen"; }
+RESOURCE TBUF r_tbuf_fileman_errsetattribs { buf = "Fehler beim setzen der Dateiattribute"; }
+RESOURCE TBUF r_tbuf_fileman_invalidfilename { buf = "Unzulässiger Name"; }
+RESOURCE TBUF r_tbuf_fileman_openerr { buf = "Fehler beim öffnen der Datei"; }
+RESOURCE TBUF r_tbuf_fileman_sametargetsource { buf = "Ziel = Quelle. Benutze dafür das Duplikat."; }
+RESOURCE TBUF r_tbuf_fileman_wrongselect { buf = "Kann kein Laufwerk wählen"; }
+RESOURCE TBUF r_tbuf_fileman_appnotregistered { buf = "Anwendung ist nicht registriert"; }
+RESOURCE TBUF r_tbuf_fileman_copying { buf = "Kopiere "; }
+RESOURCE TBUF r_tbuf_fileman_moving { buf = "Verschiebe "; }
+RESOURCE TBUF r_tbuf_fileman_deleting { buf = "Lösche "; }
+RESOURCE TBUF r_tbuf_fileman_renaming { buf = "Benenne um "; }
+RESOURCE TBUF r_tbuf_fileman_initfailure { buf = "FileMan Initialisierung fehlgeschlagen"; }
+RESOURCE TBUF r_tbuf_fileman_errscansubfolder { buf = "Fehler beim scannen der Unterverzeichnisse"; }
+RESOURCE TBUF r_tbuf_fileman_erropensource { buf = "Fehler beim öffnen der Quelldatei"; }
+RESOURCE TBUF r_tbuf_fileman_samelocation { buf = "Ziel ist ein Unterverzeichnis der Quelle"; }
+RESOURCE TBUF r_tbuf_fileman_cantwritetarget { buf = "Ziel existiert schon oder kann nicht erstellt werden"; }
+RESOURCE TBUF r_tbuf_fileman_errsourcelock { buf = "Quelle wird schon benutzt"; }
+RESOURCE TBUF r_tbuf_fileman_errdirfull { buf = "Verzeichnis ist voll"; }
+RESOURCE TBUF r_tbuf_fileman_errdevdismount { buf = "Gerät dismounted"; }
+RESOURCE TBUF r_tbuf_fileman_errfilelock { buf = "datei ist gesperrt"; }
+RESOURCE TBUF r_tbuf_fileman_errdevnotready { buf = "Gerät ist nicht bereit"; }
+RESOURCE TBUF r_tbuf_fileman_erraccessdenied { buf = "Zugriff verweigert. Datei read-only?"; }
+RESOURCE TBUF r_tbuf_fileman_errdiskfull { buf = "Laufwerk ist voll"; }
+RESOURCE TBUF r_tbuf_fileman_errwrite { buf = "Schreibfehler"; }
+RESOURCE TBUF r_tbuf_fileman_errpathnotfound { buf = "Pfad nicht gefunden"; }
+RESOURCE TBUF r_tbuf_fileman_errgeneral { buf = "allgemeiner Fehler "; }
+RESOURCE TBUF r_tbuf_fileman_errreadfile { buf = "Fehler beim lesen der  Datei"; }
+
+RESOURCE TBUF r_tbuf_misc_done { buf = "Erledigt"; }
+RESOURCE TBUF r_tbuf_misc_errors { buf = "Es sind Fehler aufgetreten"; }
+RESOURCE TBUF r_tbuf_misc_busy { buf = "Beschäftigt..."; }
+RESOURCE TBUF r_tbuf_misc_fc_bjack_sweep { buf = "Stop proximity sweep"; }
+RESOURCE TBUF r_tbuf_misc_info_title { buf = "Information"; }
+RESOURCE TBUF r_tbuf_misc_delete_title { buf = "Lösche"; }
+
+RESOURCE TBUF r_tbuf_db_recordmissing { buf = "Kann den Eintrag nicht finden. DB korupt?"; }
+RESOURCE TBUF r_tbuf_db_confirm_delete { buf = "Den Löschevorgang bestätigen?"; }
+RESOURCE TBUF r_tbuf_db_err_delete { buf = "Fehler beim Löschen des Eintrages"; }
+RESOURCE TBUF r_tbuf_db_err_mass_delete { buf = "Fehler. Einige Einträge wurden nicht gelöscht"; }
+RESOURCE TBUF r_tbuf_db_err_save { buf = "Fehler beim speichern des Eintrages. DB korupt?"; }
+RESOURCE TBUF r_tbuf_db_err_read { buf = "Fehelr beim lesen der DB"; }
+RESOURCE TBUF r_tbuf_db_err_create { buf = "Fehler beim erstellen der DB"; }
+RESOURCE TBUF r_tbuf_db_err_compact { buf = "Fehler beim verbinden der DB"; }
+RESOURCE TBUF r_tbuf_db_err_updatestats { buf = "Fehler beim updaten der Statistik"; }
+RESOURCE TBUF r_tbuf_db_err_norecords { buf = "Keine Einträge ausgewählt"; }
+RESOURCE TBUF r_tbuf_db_confirm_cancel { buf = "Verwerfen der Änderungen?"; }
+RESOURCE TBUF r_tbuf_db_confirm_cancel_title { buf = "Bestätige"; }
+RESOURCE TBUF r_tbuf_db_err_changepassword { buf = "Fehler beim ändern des Passwortes"; }
+RESOURCE TBUF r_tbuf_db_err_passwordnomatch { buf = "Passwörter stimmen nicht überein"; }
+RESOURCE TBUF r_tbuf_db_msg_encrypting { buf = "Verschlüssle den Datenbank Zugangsschlüssel"; }
+RESOURCE TBUF r_tbuf_db_err_reinit { buf = "Fehler beim löschen der DB"; }
+RESOURCE TBUF r_tbuf_db_confirm_reinit { buf = "Dies wird alles löschen. sind sie sicher?"; }
+RESOURCE TBUF r_tbuf_db_err_nodb { buf = "DB Datei nicht gefunden"; }
+RESOURCE TBUF r_tbuf_db_no_displayname { buf = "Displayname leer. Eintrag verworfen."; }
+
+// Added Sept 18th
+RESOURCE TBUF r_tbuf_db_msg_deleting { buf = "Lösche...bitte warten"; }
+
+RESOURCE MENU_PANE r_agenda_options
+{
+	items=
+	{
+		MENU_ITEM { cascade=r_agenda_completed_menu; txt="Fertiggestellt"; },
+		MENU_ITEM { cascade=r_agenda_autoexpand_menu; txt="Auto erweitern"; },
+		MENU_ITEM { command=cmdAgendaSetTodoMaxPriority; txt="Todo Priorität"; flags = EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdZoom; txt="Zoom"; }
+	};
+}
+
+RESOURCE MENU_PANE r_agenda_completed_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdAgendaCompleteCalendar; txt="Zeige Kalender"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdAgendaCompleteTodo; txt="Zeige Todo"; flags=EEikMenuItemCheckBox; }
+	};
+}
+
+RESOURCE MENU_PANE r_agenda_autoexpand_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdAgendaAutoExpandCalendar; txt="Kalender"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdAgendaAutoExpandTodo; txt="Todo"; flags=EEikMenuItemCheckBox; }
+	};
+}
+
+RESOURCE MENU_BAR r_agenda_menubar
+{
+	titles=
+   	{
+		MENU_TITLE { menu_pane=r_agenda_options; txt="Optionen"; },
+		MENU_TITLE { menu_pane=r_generic_fn; txt="Fn"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE TBUF r_tbuf_agenda_nofile { buf = "Agenda Datei fehlt"; }
+RESOURCE TBUF r_tbuf_agenda_operr { buf = "Agenda operation Fehler #"; }
+RESOURCE TBUF r_tbuf_agenda_openerror { buf = "Fehler beim öffnen der Agenda"; }
+RESOURCE TBUF r_tbuf_agenda_busy { buf = "Lese Agenda..."; }
+RESOURCE TBUF r_tbuf_agenda_errupdatetodo { buf = "Fehler beim aktualisieren des Eintrages"; }
+RESOURCE TBUF r_tbuf_agenda_notfound_or_error { buf = "Eintrag fehlt oder kann Agenda Datei nicht lesen"; }
+RESOURCE TBUF r_tbuf_agenda_none { buf = "<leer>"; }
+RESOURCE TBUF r_tbuf_agenda_notimplemented { buf = "Nicht implementiert"; }
+
+RESOURCE MENU_PANE r_fn_utilities_menu
+{
+	items =
+	{
+		MENU_ITEM { command=cmdUtilsFixApplist; txt="repariere Applist"; },
+		MENU_ITEM { command=cmdUtilsCompContacts; txt="Komprimiere Kontakte"; },
+		MENU_ITEM { command=cmdUtilsAgendaFixSynchTimeZone; txt="Fix synch Zeitzone"; },
+		MENU_ITEM { command=cmdUtilsFontSelector; txt="Setze System Schriftart"; },
+		MENU_ITEM { command=cmdUtilsP900toP800; txt="P900 to P800"; },
+		MENU_ITEM { cascade=r_fixapporder_menu; command=cmdCascadeFixAppOrder; txt="Repariere app Reihenfolge"; },
+		MENU_ITEM { cascade=r_options_autostart_menu; txt="Autostart"; }
+	};
+}
+
+RESOURCE MENU_PANE r_fixapporder_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdUtilsFixAppOrderReset; txt="Zurücksetzen"; },
+		MENU_ITEM { command=cmdUtilsFixAppOrderRestore; txt="Wiederherstellen"; },
+		MENU_ITEM { command=cmdUtilsFixAppOrderBackup; txt="Sichern"; }
+	};
+}
+
+RESOURCE TBUF r_tbuf_util_errcompactcontacts { buf = "Fehler beim verbinden der Kontakte"; }
+
+RESOURCE QIK_TOOLBAR r_toolbar_agenda
+{
+	height = EQikToolbarHeight - 4;
+	controls = 
+	{
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdAgendaRead;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderReload;
+			bmpmask = EMbmMyheaderReloadmask;
+		},
+		QIK_TBAR_BUTTON 
+		{ 
+			ypos = -3;
+			id = cmdAgendaViewOtherDate;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderTodayviewwarp;
+			bmpmask = EMbmMyheaderTodayviewwarpmask;
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_agenda_calendar_detailed
+{
+	title = "Kalender Information";
+	buttons = R_EIK_BUTTONS_OK;
+	flags = EEikDialogFlagWait;
+	pages = r_dialog_agenda_calendar_detailed_pages;
+}
+
+RESOURCE ARRAY r_dialog_agenda_calendar_detailed_pages
+{
+	items = 
+	{	
+		PAGE
+		{
+			id = idAgendaPage_Summary;		
+			text = "Zusammenfassung";
+			lines = r_dialog_agenda_calendar_summary_page;
+		},
+		PAGE
+		{
+			id = idAgendaPage_Notes;
+			text = "Notizen";
+			lines = r_dialog_agenda_calendar_notes_page;
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_agenda_calendar_summary_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "Beginn:";
+			type = EEikCtLabel;
+			id = cAgendaDetailStartDateTime;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "Ende:";
+			type = EEikCtLabel;
+			id = cAgendaDetailEndDateTime;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "Alarm:";
+			type = EEikCtLabel;
+			id = cAgendaDetailAlarmDateTime;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "Ort:";
+			type = EEikCtLabel;
+			id = cAgendaDetailLocation;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_agenda_calendar_notes_page
+{
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cAgendaDetailNotes;
+			control = GTXTED 
+			{ 
+				height = 22 * 4 + 40; width = 200; numlines = 4; flags = EEikEdwinReadOnly | EEikEdwinDisplayOnly;
+			};
+		}		
+	};
+}
+
+RESOURCE DIALOG r_dialog_agenda_todo_detailed
+{
+	title = "Todo Information";
+	buttons = R_EIK_BUTTONS_OK;
+	flags = EEikDialogFlagWait;
+	pages = r_dialog_agenda_todo_detailed_pages;
+}
+
+RESOURCE ARRAY r_dialog_agenda_todo_detailed_pages
+{
+	items = 
+	{	
+		PAGE
+		{
+			id = idAgendaPage_Summary;		
+			text = "Zusammenfassung";
+			lines = r_dialog_agenda_todo_summary_page;
+		},
+		PAGE
+		{
+			id = idAgendaPage_Notes;
+			text = "Notizen";
+			lines = r_dialog_agenda_todo_notes_page;
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_agenda_todo_summary_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "Bis:";
+			type = EEikCtLabel;
+			id = cAgendaDetailEndDateTime;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "Alarm:";
+			type = EEikCtLabel;
+			id = cAgendaDetailAlarmDateTime;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "Priorität:";
+			type = EEikCtLabel;
+			id = cAgendaDetailPriority;
+			control = LABEL 
+			{
+				txt="";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "Erledigt:";
+			type = EEikCtCheckBox;
+			id = cAgendaDetailTodoDone;
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_agenda_todo_notes_page
+{
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cAgendaDetailNotes;
+			control = GTXTED 
+			{ 
+				height = 22 * 4 + 40; width = 200; numlines = 4; flags = EEikEdwinReadOnly | EEikEdwinDisplayOnly;
+			};
+		}		
+	};
+}
+
+RESOURCE TBUF r_tbuf_fileman_prop_isfolder { buf = "Ist ein Verzeichnis"; }
+RESOURCE TBUF r_tbuf_fileman_prop_size { buf = "Größe ist "; }
+RESOURCE TBUF r_tbuf_fileman_prop_byte { buf = " Byte(s)"; }
+RESOURCE TBUF r_tbuf_fileman_prop_lastmod { buf = "Zuletzt geändert am "; }
+RESOURCE TBUF r_tbuf_unassigned { buf = "<nicht zugeordnet>%c%u"; }
+RESOURCE TBUF r_tbuf_unassigned2 { buf = "<nicht zugeordnet>%c%c%c%c"; }
+
+//--------- v1.2b --------------
+
+RESOURCE TBUF r_tbuf_utils_fixapporder_backupfail { buf = "Fehler beim erstellen des Backups."; }
+RESOURCE TBUF r_tbuf_utils_fixapporder_failed { buf = "Fehler beim wiederherstellen des Backups. Reparatur fehlgeschlagen."; }
+RESOURCE TBUF r_tbuf_utils_fixapporder_confirmrestore { buf = "Dies wird alle Anwendungen, welche nach dem Backupdatum hinzugefügt wurden, in die Unfiled Kategorie verschieben. Alle anderen Anwendungen haben ihre Kategorie wieder hergestellt, zu dem was im Backup ist. Sind sie sicher?\n\rBackup Datum ist "; }
+RESOURCE TBUF r_tbuf_utils_fixapporder_confirmreset { buf = "Dies wird alle Benutzer bezogenen Anwendungen in die Unfiled Kategorie und alle anderen Anwendungen, die vorher installiert wurden in ihre Standard Kategorie verschieben. Sind sie sicher?"; }
+RESOURCE TBUF r_tbuf_utils_fixapporder_confirmbackup { buf = "Ein früheres BAckup existiert. Das erstellen eines neuen BAckups wird das alte löschen. Sind sie sicher?\n\rAltes Backup Datum ist "; }
+RESOURCE TBUF r_tbuf_utils_fixapporder_waitawhile { buf = "Neustart der Anwendung. Telefon kann kurzzeitig langsam werden"; }
+
+//--------- P900 fix -----------
+RESOURCE TBUF r_tbuf_fc_bluejacktxt { buf = "SMan - Bluejack Log"; }
+
+//--------- v1.3 ---------------
+RESOURCE TBUF r_tbuf_edit_notextselected { buf = "Kein Text gewählt"; }
+RESOURCE TBUF r_tbuf_utils_compresscontacts_line1 { buf = "Größe davor: "; }
+RESOURCE TBUF r_tbuf_utils_compresscontacts_line2 { buf = "Größe danach: "; }
+RESOURCE TBUF r_tbuf_utils_compresscontacts_saved { buf = "Gespeichert: "; }
+RESOURCE TBUF r_tbuf_utils_fixsynchtimezone_confirm { buf = "Den Vorgang bestätigen?"; }
+RESOURCE TBUF r_tbuf_fileman_toomanydupes { buf = "Zu viele Duplikate"; }
+RESOURCE TBUF r_tbuf_fileman_findingslot { buf = "Ermittlung doppelter Namen..."; }
+RESOURCE TBUF r_tbuf_fileman_duplicating { buf = "Dupliziere..."; }
+RESOURCE TBUF r_tbuf_fileman_errordupe { buf = "Fehler beim Duplizieren"; }
+RESOURCE TBUF r_tbuf_fileman_dupedone { buf = "Kopiert als "; }
+RESOURCE TBUF r_tbuf_fileman_errsetmodified { buf = "Fehler beim setzen des Datums/der Zeit"; }
+RESOURCE TBUF r_tbuf_dtmf_generating { buf = "Generiere DTMF WAV..."; }
+RESOURCE TBUF r_tbuf_dtmf_nonumber { buf = "Keine Nummer"; }
+RESOURCE TBUF r_tbuf_hexedit_notready { buf = "Fehler beim ermitteln der Lautstärke"; }
+RESOURCE TBUF r_tbuf_hexedit_buffull { buf = "Bitte Seite speichern. Puffer ist voll."; }
+RESOURCE TBUF r_tbuf_hexedit_errorwritefile { buf = "Fehler beim schreiben der Datei"; }
+RESOURCE TBUF r_tbuf_hexedit_endoffile { buf = "Dateiende erreicht"; }
+RESOURCE TBUF r_tbuf_hexedit_beginningoffile { buf = "Dateianfang erreicht"; }
+RESOURCE TBUF r_tbuf_hexedit_readonly { buf = "Read only"; }
+RESOURCE TBUF r_tbuf_hexedit_fileinrom { buf = "Datei ist im ROM!"; }
+RESOURCE TBUF r_tbuf_hexedit_fileisreadonly { buf = "Datei ist readonly"; }
+RESOURCE TBUF r_tbuf_hexedit_smanfile { buf = "Can't edit - required by SMan"; }
+RESOURCE TBUF r_tbuf_hexedit_writeerror { buf = "Schreibfehler"; }
+RESOURCE TBUF r_tbuf_hexedit_sizeerror { buf = "Gespeichert. Fehler beim lesen der Dateigröße"; }
+RESOURCE TBUF r_tbuf_hexedit_truncerror { buf = "Gespeichert. Fehler beim einstellen der Dateigröße"; }
+RESOURCE TBUF r_tbuf_hexedit_seekerror { buf = "Nicht gepseichert. Seek error"; }
+RESOURCE TBUF r_tbuf_hexedit_flusherror { buf = "Nicht gespeichert. Fehler beim spülen"; }
+RESOURCE TBUF r_tbuf_hexedit_writeok { buf = "Gespeichert"; }
+RESOURCE TBUF r_tbuf_hexedit_nochanges { buf = "Keine Änderungen gemacht"; }
+RESOURCE TBUF r_tbuf_hexedit_getdateerror { buf = "Fehler beim ermitteln des Datums"; }
+RESOURCE TBUF r_tbuf_findfile_topreceedsfrom { buf = "To date preceeds From date"; }
+RESOURCE TBUF r_tbuf_findfile_nolocation { buf = "Keine Suche eingegeben"; }
+RESOURCE TBUF r_tbuf_findfile_invalidsearchname { buf = "Unzulässiger Suchbegriff"; }
+RESOURCE TBUF r_tbuf_findfile_errorsinsearch { buf = "Suche wegen Fehlern unvollständig"; }
+RESOURCE TBUF r_tbuf_findfile_sorting { buf = "Sortiere Ergebnisse..."; }
+RESOURCE TBUF r_tbuf_findfile_done { buf = "%d Datei(en) gefunden"; }
+RESOURCE TBUF r_tbuf_utils_misc_reboot { buf = "Um die Änderungen zu sehen ist ein Neustart notwendig"; }
+RESOURCE TBUF r_tbuf_fc_cellareatxt { buf = "SMan - Netzwerk Info"; }
+RESOURCE TBUF r_tbuf_autostart_errdelete { buf = "Error removing recognizer"; }
+RESOURCE TBUF r_tbuf_autostart_errcopy { buf = "Error copying recognizer"; }
+RESOURCE TBUF r_tbuf_autostart_enabled { buf = "Aktiviert"; }
+RESOURCE TBUF r_tbuf_autostart_disabled { buf = "Deaktiviert"; }
+RESOURCE TBUF r_tbuf_autostart_deactivate { buf = "Deaktivert"; }
+RESOURCE TBUF r_tbuf_shortcut_fcinvalid { buf = "Unzulässige Verknüpfung in Flipclosed"; }
+RESOURCE TBUF r_tbuf_misc_unsupported { buf = "Nicht unterstützt"; }
+RESOURCE TBUF r_tbuf_cellid_errinitstore { buf = "Fehler beim Initialisieren des Zelleninfospeichers"; }
+RESOURCE TBUF r_tbuf_cellid_errreadgroups { buf = "Fehler beim lesen der Gruppeninfo"; }
+RESOURCE TBUF r_tbuf_cellid_errcreategroup { buf = "Fehler beim erstellen der Gruppe"; }
+RESOURCE TBUF r_tbuf_cellid_autorecordok { buf = "Autorecording gestartet"; }
+RESOURCE TBUF r_tbuf_cellid_errautosave { buf = "Autorecording gestoppet. Fehler beim speichern der Zelleninfo"; }
+RESOURCE TBUF r_tbuf_cellid_autorecordoff { buf = "Autorecording gestoppet"; }
+RESOURCE TBUF r_tbuf_cellid_genericeditordialog_strrequired { buf = "Sie müssen etwas angeben!"; }
+RESOURCE TBUF r_tbuf_cellid_errdelgroup { buf = "Fehler beim löschen der Gruppe(n)"; }
+RESOURCE TBUF r_tbuf_cellid_errsetgroupstate { buf = "Fehler beim setzen des Gruppen Status"; }
+RESOURCE TBUF r_tbuf_cellid_errrengroup { buf = "Fehler beim Umbenennen der Gruppe"; }
+RESOURCE TBUF r_tbuf_cellid_noitemsselected { buf = "Nichts ausgewählt"; }
+RESOURCE TBUF r_tbuf_cellid_errdelcell { buf = "Fehler beim löschen der Zelle(n)"; }
+RESOURCE TBUF r_tbuf_cellid_errcreatecell { buf = "Fehler beim erstellen der Zelle"; }
+RESOURCE TBUF r_tbuf_cellid_errsavecell { buf = "Fehler beim speichern der Zelle"; }
+RESOURCE TBUF r_tbuf_cellid_requirecountrycode { buf = "Country code notwendig"; }
+RESOURCE TBUF r_tbuf_cellid_requirenetworkid { buf = "Netzwerk id notwendig"; }
+RESOURCE TBUF r_tbuf_cellid_noitems { buf = "Keine Teile!"; }
+RESOURCE TBUF r_tbuf_cellid_nogroups { buf = "Keine Gruppen!"; }
+RESOURCE TBUF r_tbuf_cellid_disableautorec { buf = "Zuerst Autorecording abschalten"; }
+RESOURCE TBUF r_tbuf_cellid_errcellexists { buf = "Zelle existiert beriets in der Gruppe"; }
+RESOURCE TBUF r_tbuf_cellid_errdbcompress { buf = "Fehler beim komprimieren des Speichers"; }
+RESOURCE TBUF r_tbuf_cellid_errdbupdatestats { buf = "Fehler beim aktualisieren der Statistik"; }
+RESOURCE TBUF r_tbuf_cellid_errreaddb { buf = "Fehler beim lesen der DB"; }
+RESOURCE TBUF r_tbuf_cellid_cellnotfound { buf = "Zelle nicht gefunden"; }
+RESOURCE TBUF r_tbuf_cellid_groupnotfound { buf = "Gruppe nicht gefunden"; }
+RESOURCE TBUF r_tbuf_cellid_errmovegroup { buf = "Fehler beim Verschieben der Gruppe"; }
+RESOURCE TBUF r_tbuf_cellid_errmoveevent { buf = "Fehler beim verschieben der Gruppe"; }
+RESOURCE TBUF r_tbuf_cellid_cantmove { buf = "Kann nicht in diese Richtung verschoben werden"; }
+RESOURCE TBUF r_tbuf_cellid_noaudiofile { buf = "Audio Datei nicht spezifiziert"; }
+RESOURCE TBUF r_tbuf_cellid_errsaveevent { buf = "Fehler beim speichern des Ereignises"; }
+RESOURCE TBUF r_tbuf_cellid_errdelevents { buf = "Fehler beim löschen des Ereignis(es)"; }
+RESOURCE TBUF r_tbuf_cellid_errseteventstate { buf = "Fehler beim setzen vom Status des Ereignis(es)"; }
+RESOURCE TBUF r_tbuf_cellid_errunknowneventtype { buf = "Unbekannter Ereignis Typ"; }
+RESOURCE TBUF r_tbuf_cellid_errcreateoutput { buf = "Fehler beim erstellen der Ausgabedatei"; }
+RESOURCE TBUF r_tbuf_cellid_numexported { buf = "Gruppe(n) exportiert: "; }
+//RESOURCE TBUF r_tbuf_cellid_errimportlistfiles { buf = "Fehler beim auflisten der importierten Dateien"; }
+RESOURCE TBUF r_tbuf_cellid_noimportfiles { buf = "Keine Dateien zum importieren"; }
+RESOURCE TBUF r_tbuf_cellid_errparsingimportfile { buf = "Fehler beim parsen der Importdatei"; }
+RESOURCE TBUF r_tbuf_cellid_errreadingimportfile { buf = "Fehler beim lesen der Importdatei"; }
+RESOURCE TBUF r_tbuf_cellid_errmisc { buf = "Fehler aufgetreten in Zeile: "; }
+RESOURCE TBUF r_tbuf_cellid_impexp_generalerror { buf = "Fehler aufgetreten in Zeile "; }
+RESOURCE TBUF r_tbuf_cellid_impexp_generaldberror { buf = "DB gab einen Fehler zurück "; }
+RESOURCE TBUF r_tbuf_misc_dbrecovery { buf = "Wiederherstellung der Indizes"; }
+RESOURCE TBUF r_tbuf_misc_dbupdatestats { buf = "Aktualisiere Statistiken"; }
+RESOURCE TBUF r_tbuf_misc_errrecovery { buf = "Fehler beim Wiederherstellung der DB"; }
+RESOURCE TBUF r_tbuf_misc_erropendb { buf = "Fehler beim öffen der Datenbank"; }
+RESOURCE TBUF r_tbuf_misc_processing { buf = "Bearbeite "; }
+RESOURCE TBUF r_tbuf_cellid_exportingas { buf = "Exportiere als "; }
+RESOURCE TBUF r_tbuf_cellid_shortname { buf = "Short Name: "; }
+RESOURCE TBUF r_tbuf_cellid_longname { buf = "Long Name: "; }
+RESOURCE TBUF r_tbuf_cellid_countrycode { buf = "Ländercode: "; }
+RESOURCE TBUF r_tbuf_cellid_networkid { buf = "Netzwerk ID: "; }
+RESOURCE TBUF r_tbuf_cellid_cell { buf = "Zelle: "; }
+RESOURCE TBUF r_tbuf_cellid_cellid { buf = "Zell ID: "; }
+RESOURCE TBUF r_tbuf_cellid_group { buf = "Gruppe: "; }
+RESOURCE TBUF r_tbuf_cellid_multigroup { buf = "Gruppe[*]: "; }
+RESOURCE TBUF r_tbuf_cellid_signalstrength { buf = "Signalstärke: "; }
+RESOURCE TBUF r_tbuf_bjack_errloadexlist { buf = "Konnte Ausschlußliste nicht laden"; }
+RESOURCE TBUF r_tbuf_bjack_errsaveexlist { buf = "Konnte Ausschlußliste nicht speichern"; }
+RESOURCE TBUF r_tbuf_bjack_exclude { buf = "Gerät in Ausschlußliste gefunden. Überspringe."; }
+RESOURCE TBUF r_tbuf_misc_warning { buf = "Warnung"; }
+RESOURCE TBUF r_tbuf_recog_warning { buf = "Das Autostartmodule wird auf dem Laufwerk C: abgelegt. Wenn das Module einen Fehler verursacht, kann dies das Telefon \
+unbenutzbar machen, bis es beim ServicePunkt neu geflasht wird.\n\rWollen sie wirklich weiter machen?"; }
+RESOURCE TBUF r_tbuf_db_export { buf = "Exportiere nach:"; }
+RESOURCE TBUF r_tbuf_db_export_erroutput { buf = "Fehler beim erzeugen der Ausgabedatei"; }
+RESOURCE TBUF r_tbuf_db_createrecord { buf = "Fehler beim einfügen der Aufnahme"; }
+RESOURCE TBUF r_tbuf_misc_navigation_noselection { buf = "Keine Module gewählt"; }
+RESOURCE TBUF r_tbuf_utils_p900top800_errdelete { buf = "Fehler beim löschen einiger Dateien"; }
+RESOURCE TBUF r_tbuf_utils_p900top800_errcopy { buf = "Fehler beim löschen der INI Dateien"; }
+RESOURCE TBUF r_tbuf_misc_errcreatefile { buf = "Fehler beim erstellen der Datei"; }
+RESOURCE TBUF r_tbuf_misc_errzipmissing { buf = "Zipdatei fehlt"; }
+RESOURCE TBUF r_tbuf_misc_errreadzip { buf = "Fehler beim lesen, Zipdatei kaputt?"; }
+RESOURCE TBUF r_tbuf_misc_errinitzip { buf = "Fehler beim initialisieren der Zip Bibliothek"; }
+RESOURCE TBUF r_tbuf_misc_erropenzip { buf = "Fehler beim öffnen der Zipdatei"; }
+RESOURCE TBUF r_tbuf_utils_p900top800_confirm { buf = "Dies wird auch das klassische Farbschema bestätigen. Bitte starten sie auch \"Töne \
+und Signale\" in der\"Systemsteuerung\" und überprüfen die Einstellungen. Sie werden Ereignise immernoch hören (mit Standardklängen) aber die Einstellungen könnten \
+auf Datei lauten, welche von SMan entfernt wurden.\n\rMit dem Vorgang weitermachen?"; }
+RESOURCE TBUF r_tbuf_folderfile_browser_onlyselectfile { buf = "Es können nur Dateien ausgewählt werden"; }
+RESOURCE TBUF r_tbuf_misc_fatalerror { buf = "Fataler Fehler"; }
+RESOURCE TBUF r_tbuf_utils_p900top800_failed { buf = "Fehler beim ersetzen der .INI Datein in C:\\SYSTEM\\DATA\\THEMES.\n\rBitte bestätigen sie jetzt ein Theme oder ihr Gerät bootet evtl. nicht mehr!!!"; }
+RESOURCE TBUF r_tbuf_alt_title_file_folder_browser_dialog { buf = "Wähle Datei(en)"; }
+
+RESOURCE MENU_PANE r_dtmf_edit
+{
+	items=
+	{
+		MENU_ITEM { command=cmdDTMFEditCut; txt="Ausschneiden"; flags=EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdDTMFEditCopy; txt="Kopieren"; flags=EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdDTMFEditPaste; txt="Einfügen"; flags=EEikMenuItemDimmed | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdDTMFEditClear; txt="Löschen"; flags=EEikMenuItemDimmed; }
+	};
+}
+
+RESOURCE MENU_BAR r_dtmfdialer_menubar
+{
+	titles=
+   	{
+   		MENU_TITLE { menu_pane=r_dtmfdialer_dial; txt="Wählen"; },
+   		MENU_TITLE { menu_pane=r_dtmf_edit; txt="Ändern"; },
+		MENU_TITLE { menu_pane=r_generic_fn; txt="Fn"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE MENU_PANE r_dtmfdialer_dial
+{
+	items=
+	{
+		MENU_ITEM { command=cmdDTMFDialerInput; txt="Benutze Keypad"; flags=EEikMenuItemCheckBox; }
+	};
+}
+
+RESOURCE MENU_PANE r_hexeditor_file
+{
+	items=
+	{
+		MENU_ITEM { command=cmdHexEditorFileSave; txt="Speichern"; },
+		MENU_ITEM { command=cmdHexEditorFileReload; txt="Neuladen"; },
+		MENU_ITEM { command=cmdHexEditorFilePreserveDate; txt="Preserve Datum"; flags = EEikMenuItemCheckBox; }
+	};
+}
+
+RESOURCE MENU_PANE r_hexeditor_edit
+{
+	items=
+	{
+		MENU_ITEM { command=cmdHexEditorEditDeleteBytes; txt = "Löschen"; flags=EEikMenuItemDimmed; },
+		MENU_ITEM { command=cmdHexEditorEditToggleReadOnly; txt="nur lesen"; flags=EEikMenuItemCheckBox | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdHexEditorEditResize; txt="Größe ändern"; }
+	};
+}
+
+RESOURCE MENU_BAR r_hexeditor_menubar
+{
+	titles=
+	{
+		MENU_TITLE { menu_pane=r_hexeditor_file; txt="Datei"; },
+		MENU_TITLE { menu_pane=r_hexeditor_edit; txt="Ändern"; }
+	};
+}
+
+RESOURCE QIK_TOOLBAR r_toolbar_hexeditor
+{
+	height = EQikToolbarHeight - 4;
+	controls = 
+	{
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdHexEditorBeginPage;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderHexeditbeginpage;
+			bmpmask = EMbmMyHeaderHexeditbeginpagemask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdHexEditorPrevPage;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderHexeditprevpage;
+			bmpmask = EMbmMyHeaderHexeditprevpagemask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdHexEditorGoto;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderHexeditgoto;
+			bmpmask = EMbmMyHeaderHexeditgotomask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdHexEditorNextPage;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderHexeditnextpage;
+			bmpmask = EMbmMyHeaderHexeditnextpagemask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdHexEditorEndPage;
+			bmpfile = "*";
+			bmpid = EMbmMyHeaderHexeditendpage;
+			bmpmask = EMbmMyHeaderHexeditendpagemask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdHexEditorBack;
+			bmpfile = "Z:\\SYSTEM\\DATA\\QUARTZ.MBM";
+			bmpid = EMbmQuartzBackarrow;
+			bmpmask = EMbmQuartzBackarrowmask;
+			alignment = EQikToolbarRight;
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_ok_cancel
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidCancel; button = CMBUT { txt = "Abbrechen"; }; },
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "Ok"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_hexedit_gotooffset
+{
+	title = "Offset Eingabe";
+	buttons = r_buttons_ok_cancel;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "Hex Offset: ";
+			type = EEikCtEdwin;
+			id = cHexEditHexOffset;
+			control = EDWIN 
+			{ 
+				lines = 1; maxlength = 7; width = 8;
+			};
+		},
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "Dez Offset: ";
+			id = cHexEditDecOffset;
+			control = QIK_NUMBER_EDITOR 
+			{ 
+				min = 0; max = 0x7fffffff;
+			};
+		},
+		DLG_LINE
+		{
+			type = EQikCtSlider;
+			prompt = "Range : ";
+			id = cHexEditSliderOffset;
+			control = QIK_SLIDER
+			{
+				min_value = 0;
+				// Something odd about this control. In the RSS definition, max_value is a WORD
+				// which only takes $FFFF as the max value. However, in the class, the max value
+				// is a TInt which goes up to 32 bits. hmmmmmmm.......
+				max_value = 0;
+			};
+		}
+	};
+}
+
+RESOURCE DIALOG r_dialog_hexedit_resize
+{
+	title = "Größe ändern";
+	buttons = r_buttons_ok_cancel;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EQikCtSlider;
+			prompt = "Hex Fenstergröße : ";
+			id = cHexEditSliderResize;
+			control = QIK_SLIDER
+			{
+				min_value = 3;
+				max_value = 7;
+				flags = EQikSliderSnapToMarker;
+				num_markers = 5;
+			};
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_yes_no_cancel
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "Bestätigen"; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "Verwerfen"; }; flags=EEikLabeledButtonIsDefault; },
+		DLG_BUTTON { id = EEikBidSpace; button = CMBUT { txt = "Abbrechen"; }; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_hexedit_confirmchanges
+{
+	title = "Bestätige Änderungen";
+	buttons = r_buttons_yes_no_cancel;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtLabel;
+			control = LABEL 
+			{
+				txt="Bestätigen Sie die Änderungen, an dieser Seite?";
+				horiz_align=EEikLabelAlignHLeft;
+			};
+		}
+	};
+}
+
+RESOURCE QIK_TOOLBAR r_toolbar_findfile
+{
+	height = EQikToolbarHeight - 4;
+	controls = 
+	{
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdFindFileStart;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderFindfilestart;
+			bmpmask = EMbmMyheaderFindfilestartmask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdFindFileStop;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderFindfilestop;
+			bmpmask = EMbmMyheaderFindfilestopmask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdFindFileCriteria;
+			bmpfile = "*";
+			bmpid = EMbmMyheaderFindfilecriteria;
+			bmpmask = EMbmMyheaderFindfilecriteriamask;
+		},
+		QIK_TBAR_BUTTON
+		{
+			ypos = -3;
+			id = cmdFindFileBack;
+			bmpfile = "Z:\\SYSTEM\\DATA\\QUARTZ.MBM";
+			bmpid = EMbmQuartzBackarrow;
+			bmpmask = EMbmQuartzBackarrowmask;
+			alignment = EQikToolbarRight;
+		}
+	};
+}
+
+RESOURCE MENU_BAR r_findfile_menubar
+{
+	titles=
+   	{
+   		MENU_TITLE { menu_pane=r_findfile_options; txt="Optionen"; }
+	};
+}
+
+RESOURCE MENU_PANE r_findfile_options
+{
+	items=
+	{
+		MENU_ITEM { command=cmdZoom; txt = "Zoom"; }
+	};
+}
+
+RESOURCE ARRAY r_findfile_modified_option_choices
+{
+	items =
+	{
+		LBUF { txt = "Ignoriere"; },
+		LBUF { txt = "Heute"; },
+		LBUF { txt = "Gestern"; },
+		LBUF { txt = "Andere"; }
+	};
+}
+
+RESOURCE ARRAY r_empty_array
+{
+	items =
+	{
+		// Do not change this. Does not require translation. 'W' chosen to maximize width
+		// of control that uses this. Used in PreLayoutDynInitL() of dialogs.
+		LBUF { txt = "WWWWWWWWWWWWWWWWWWW"; } 
+	};
+}
+
+RESOURCE DIALOG r_dialog_findfile_criteria
+{
+	title = "Auswahl Kriterien";
+	buttons = r_buttons_ok_cancel;
+	flags = EEikDialogFlagWait;
+	pages = r_dialog_findfile_criteria_pages;
+}
+
+RESOURCE ARRAY r_dialog_findfile_criteria_pages
+{
+	items = 
+	{	
+		PAGE
+		{
+			text = "Algemein";
+			lines = r_dialog_findfile_criteria_general_page;
+		},
+		PAGE
+		{
+			text = "Datum";
+			lines = r_dialog_findfile_criteria_date_page;
+		}
+	};
+}
+
+RESOURCE ARRAY r_findfile_criteria_array
+{
+	items=
+	{	
+		LBUF { txt="*.*"; },
+		LBUF { txt="*.sis"; },
+		LBUF { txt="*.gif"; },
+		LBUF { txt="*.jpg"; },
+		LBUF { txt="*.zip"; }
+	};	
+}
+
+RESOURCE ARRAY r_dialog_findfile_criteria_general_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "Namen:";
+			type = EEikCtComboBox;
+			id = cFindFileSearchName;
+			control = COMBOBOX
+			{
+				maxarraysize = 5;
+				maxlength = 256;
+				width = 99;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "Position:";
+			type = EEikCtListBox;
+			id = cFindFileLocation;
+			control = LISTBOX
+			{
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				array_id = r_empty_array;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_dialog_findfile_criteria_date_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "Geändert:";
+			type = EEikCtChoiceList;
+			id = cFindFileModifiedOption;
+			control = CHOICELIST
+			{
+				array_id = r_findfile_modified_option_choices;
+			};
+		},
+		DLG_LINE
+		{
+			type = EQikCtDateEditor;
+			prompt = "von:";
+			id = cFindFileModifiedFromDate;
+			control = QIK_DATE_EDITOR
+			{
+				minDate = DATE
+				{
+					day = 0;
+					month = 0;
+					year = 1900;
+				};
+				maxDate = DATE
+				{
+					day = 30;
+					month = 11;
+					year = 2999;
+				};
+			};
+		},
+		DLG_LINE
+		{
+			type = EQikCtDateEditor;
+			prompt = "nach:";
+			id = cFindFileModifiedToDate;
+			control = QIK_DATE_EDITOR
+			{
+				minDate = DATE
+				{
+					day = 0;
+					month = 0;
+					year = 1900;
+				};
+				maxDate = DATE
+				{
+					day = 30;
+					month = 11;
+					year = 2999;
+				};
+			};
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_fontselector
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "Zurücksetzen"; }; },
+		DLG_BUTTON { id = EEikBidCancel; button = CMBUT { txt = "Abbrechen"; }; },
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "Ok"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_fontselector
+{
+	title = "Wähle Schriftart";
+	buttons = r_buttons_fontselector;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "Schriftart:";
+			type = EEikCtChoiceList;
+			id = cFontSelectorFontList;
+			control = CHOICELIST
+			{
+				array_id = r_empty_array;
+			};
+		},
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "Größe:";
+			id = cFontSelectorFontSize;
+			control = QIK_NUMBER_EDITOR { min = 5; max = 30; };
+		},
+		DLG_LINE
+		{
+			prompt = "Anti-alias:";
+			type = EEikCtCheckBox;
+			id = cFontSelectorAntiAlias;
+		},
+		DLG_LINE
+		{
+			prompt = "Vorschau:";
+			type = EEikCtRichTextEditor;
+			id = cFontSelectorPreview;
+			control = RTXTED
+			{ 
+				width = 150; height = 60; numlines = 20; flags = EEikEdwinNoHorizScrolling | EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinDisplayOnly;
+			};
+		}
+	};
+}
+
+RESOURCE MENU_PANE r_cellarea_edit
+{
+	items =
+	{
+		MENU_ITEM { command=cmdCellAreaEdit; txt="Ändern"; flags = EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdCellAreaInitStore; txt="Re-init Speicher"; },
+		MENU_ITEM { command=cmdCellAreaCompress; txt="Komprimiere"; },
+		MENU_ITEM { command=cmdCellAreaUpdateStats; txt="Update Statistik"; }
+	};
+}
+
+RESOURCE MENU_PANE r_cellarea_options
+{
+	items=
+	{
+		MENU_ITEM { command=cmdCellAreaAlwaysRun; txt="Autostart"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdCellAreaToggleRecording; txt="Autorecord Zellen"; flags=EEikMenuItemCheckBox | EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdCellAreaEventDelay; txt="Ereignis Verzögerung"; }
+	};	
+}
+
+RESOURCE MENU_BAR r_cellarea_menubar
+{
+	titles=
+   	{
+		MENU_TITLE { menu_pane = r_cellarea_options; txt="Optionen"; },
+		MENU_TITLE { menu_pane = r_cellarea_edit; txt="Speicher"; },
+		MENU_TITLE { menu_pane = r_generic_fn; txt="Fn"; flags = EEikMenuTitleRightAlign; }
+	};
+}
+
+RESOURCE MENU_PANE r_fc_cellarea_menu
+{
+	items=
+	{
+		MENU_ITEM { cascade=r_fc_moduleswitch_menu; command=cmdFCSwitchMenu; txt="Module"; },
+		MENU_ITEM { command=cmdFlushOut; txt="Prozesse spülen"; },
+		MENU_ITEM { command=cmdUtilsFixApplist; txt="repariere Applist"; flags = EEikMenuItemSeparatorAfter; },
+		MENU_ITEM { command=cmdCellAreaAlwaysRun; txt="Autostart"; flags=EEikMenuItemCheckBox; },
+		MENU_ITEM { command=cmdCellAreaToggleRecording; txt="Auto aufnahme"; flags=EEikMenuItemCheckBox; }
+	};	
+}
+
+RESOURCE MENU_PANE r_fc_moduleswitch_menu
+{
+	items=
+	{
+		MENU_ITEM { command=cmdSwitchFCBJackView; txt="Bluejack";},
+		MENU_ITEM { command=cmdSwitchFCCellAreaView; txt="Network Info"; }
+	};	
+}
+
+RESOURCE TBUF r_tbuf_credits { buf = "The developers of SMan would like to thank \
+the following people / organizations:**\
+Symbian*- Phil Spencer*- David Mery**\
+Sony Ericsson*- James Lowerence*- Eric Goh**\
+Motorola*- Peter Ho**\
+Meero in My-Symbian.com's forum for the system font information**\
+All the language translators for SMan**\
+All contributors of SMan"; }
+
+RESOURCE DIALOG r_dialog_credits
+{
+	title = "Credits";
+	buttons = R_EIK_BUTTONS_DONE;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cCreditsText;
+			control = GTXTED
+			{ 
+				width = 150; height = 150; numlines = 20; flags = EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinDisplayOnly;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_edit_cells_dialog_groups_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtColListBox;
+			id = cCellDBGroupsListBox;
+			control = LISTBOX
+			{
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				array_id = r_empty_array;
+				height = 6;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_edit_cells_dialog_cells_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Gruppen:";
+			id = cCellDBSelectedGroupOnCellsPage;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array; 
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "Zellen:";
+			type = EEikCtColListBox;
+			id = cCellDBCellsListBox;
+			control = LISTBOX
+			{
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				array_id = r_empty_array;
+				height = 5;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_edit_cells_dialog_events_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Gruppen:";
+			id = cCellDBSelectedGroupOnEventsPage;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "Ereignise:";
+			type = EEikCtColListBox;
+			id = cCellDBEventsListBox;
+			control = LISTBOX
+			{
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				array_id = r_empty_array;
+				height = 5;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_edit_cells_dialog_importexport_page
+{
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtListBox;
+			id = cCellDBImportExportGroupListBox;
+			control = LISTBOX 
+			{ 
+				array_id = r_empty_array;
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				height = 7;
+			};
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_edit_cells_dialog_groups_page
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidCellGroupSelectAll; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderAll; bmpmask = EMbmMyheaderAllmask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupSelectNone; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderNone; bmpmask = EMbmMyheaderNonemask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupShiftUp; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderUparrow; bmpmask = EMbmMyHeaderUparrowmask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupShiftDown; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderDownarrow; bmpmask = EMbmMyHeaderDownarrowmask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupEnable; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCheckmark; bmpmask = EMbmMyHeaderCheckmarkmask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupDisable; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCrossmark; bmpmask = EMbmMyHeaderCrossmarkmask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupDel; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditdelete; bmpmask = EMbmMyHeaderCelleditdeletemask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupNew; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditnew; bmpmask = EMbmMyHeaderCelleditnewmask; }; },
+		DLG_BUTTON { id = EEikBidCellGroupRen; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditedit; bmpmask = EMbmMyHeaderCellediteditmask; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "Ok"; }; }
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_edit_cells_dialog_cells_page
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidCellCellsSelectAll; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderAll; bmpmask = EMbmMyheaderAllmask; }; },
+		DLG_BUTTON { id = EEikBidCellCellsSelectNone; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderNone; bmpmask = EMbmMyheaderNonemask; }; },
+		DLG_BUTTON { id = EEikBidCellCellsFind; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderFindfile; bmpmask = EMbmMyheaderFindfilemask; }; },
+		DLG_BUTTON { id = EEikBidCellCellsDel; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditdelete; bmpmask = EMbmMyHeaderCelleditdeletemask; }; },
+		DLG_BUTTON { id = EEikBidCellCellsMove; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditmove; bmpmask = EMbmMyHeaderCelleditmovemask; }; },
+		DLG_BUTTON { id = EEikBidCellCellsNew; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditnew; bmpmask = EMbmMyHeaderCelleditnewmask; }; },
+		DLG_BUTTON { id = EEikBidCellCellsEdit; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditedit; bmpmask = EMbmMyHeaderCellediteditmask; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "Ok"; }; }
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_edit_cells_dialog_events_page
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidCellEventsSelectAll; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderAll; bmpmask = EMbmMyheaderAllmask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsSelectNone; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderNone; bmpmask = EMbmMyheaderNonemask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsShiftUp; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderUparrow; bmpmask = EMbmMyHeaderUparrowmask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsShiftDown; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderDownarrow; bmpmask = EMbmMyHeaderDownarrowmask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsEnable; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCheckmark; bmpmask = EMbmMyHeaderCheckmarkmask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsDisable; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCrossmark; bmpmask = EMbmMyHeaderCrossmarkmask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsDel; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditdelete; bmpmask = EMbmMyHeaderCelleditdeletemask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsMove; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditmove; bmpmask = EMbmMyHeaderCelleditmovemask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsNew; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditnew; bmpmask = EMbmMyHeaderCelleditnewmask; }; },
+		DLG_BUTTON { id = EEikBidCellEventsEdit; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditedit; bmpmask = EMbmMyHeaderCellediteditmask; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "Ok"; }; }
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_edit_cells_dialog_importexport_page
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidCellImport; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditimport; bmpmask = EMbmMyHeaderCelleditimportmask; }; },
+		DLG_BUTTON { id = EEikBidCellExport; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyHeaderCelleditexport; bmpmask = EMbmMyHeaderCelleditexportmask; }; },
+		DLG_BUTTON { id = EEikBidCellImportExportSelectAll; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderAll; bmpmask = EMbmMyheaderAllmask; }; },
+		DLG_BUTTON { id = EEikBidCellImportExportSelectNone; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderNone; bmpmask = EMbmMyheaderNonemask; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "Ok"; }; }
+	};
+}
+
+RESOURCE ARRAY r_edit_cells_dialog_pages
+{
+	items = 
+	{	
+		PAGE
+		{
+			id = idCellIdPage_Groups;
+			buttons = r_buttons_edit_cells_dialog_groups_page;
+			text = "Gruppen";
+			lines = r_edit_cells_dialog_groups_page;
+		},
+		PAGE
+		{
+			id = idCellIdPage_Cells;
+			buttons = r_buttons_edit_cells_dialog_cells_page;
+			text = "Zellen";
+			lines = r_edit_cells_dialog_cells_page;
+		},
+		PAGE
+		{
+			id = idCellIdPage_Events;
+			buttons = r_buttons_edit_cells_dialog_events_page;
+			text = "Ereignis";
+			lines = r_edit_cells_dialog_events_page;
+		},
+		PAGE
+		{
+			id = idCellIdPage_ImportExport;
+			buttons = r_buttons_edit_cells_dialog_importexport_page;
+			text = "Teilen";
+			lines = r_edit_cells_dialog_importexport_page;
+		}
+	};
+}
+
+RESOURCE DIALOG r_edit_cells_dialog
+{
+	title = "Zellen Info DB";
+	flags = EEikDialogFlagWait;
+	pages = r_edit_cells_dialog_pages;
+	//buttons = R_EIK_BUTTONS_OK;
+}
+
+// Generic dialog for cell db editor
+RESOURCE DIALOG r_dialog_misc_editstring
+{
+	title = "Namen eingeben";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cString;
+			control = GTXTED 
+			{ 
+				height = 55; width = 150; numlines = 1; textlimit = 255; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd;
+			};
+		}
+	};
+}
+
+// Dialog for creating a new group
+RESOURCE DIALOG r_dialog_cellid_newgroup
+{
+	title = "Neue Gruppe";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cString;
+			control = GTXTED 
+			{ 
+				height = 55; width = 150; numlines = 1; textlimit = 255; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "Aktiv:";
+			id = cCheckBox;
+		}		
+	};
+}
+
+// Dialog for creating a new cell
+RESOURCE DIALOG r_dialog_cellid_newcell
+{
+	title = "Zellen Details";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "ID:";
+			id = cCellId;
+			control = QIK_NUMBER_EDITOR { min = 1; max = 0x7fffffff; };
+		},
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			prompt = "Land:";
+			id = cCountryCode;
+			control = GTXTED 
+			{ 
+				height = 22; width = 150; numlines = 1; flags = EEikEdwinJustAutoCurEnd; textlimit = 4;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			prompt = "Netzwerk:";
+			id = cNetworkCode;
+			control = GTXTED 
+			{ 
+				height = 22; width = 150; numlines = 1; flags = EEikEdwinJustAutoCurEnd; textlimit = 8;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			prompt = "Nachfolgend:";
+			id = cCellDescription;
+			control = GTXTED
+			{ 
+				height = 55; width = 150; numlines = 1; textlimit = 50; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Gruppe:";
+			id = cCellGroups;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array; 
+			};
+		}
+	};
+}
+
+// Dialog for moving a bunch of cells to another group
+RESOURCE DIALOG r_dialog_cellid_movecell
+{
+	title = "Wähle Gruppe";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Gruppe:";
+			id = cCellGroups;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array; 
+			};
+		}
+	};
+}
+
+// Dialog for finding a new cell
+RESOURCE DIALOG r_dialog_cellid_findcell
+{
+	title = "Finde Zelle";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "ID:";
+			id = cCellId;
+			control = QIK_NUMBER_EDITOR { min = 1; max = 0x7fffffff; };
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_foundcells
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "Gehe zu"; }; flags=EEikLabeledButtonIsDefault; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "Schließe"; }; }
+	};
+}
+
+// Dialog to display found cells
+RESOURCE DIALOG r_dialog_cellid_foundcell
+{
+	title = "Suchergebnis";
+	buttons = r_buttons_foundcells;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			prompt = "Gruppe:";
+			type = EEikCtListBox;
+			id = cCellGroups;
+			control = LISTBOX
+			{
+				array_id = r_empty_array;
+				height = 6;
+			};
+		}
+	};
+}
+
+// The numbers at the end of the array represent the event_id that is stored in the
+// cell database. Do not change!! Note: number 4 cannot be used because it is reserved for
+// an unknown event type. The reason for this is because in our icon array for the columnlistbox,
+// icon index #4 (i.e. the 5th icon) is a special icon to indicate an unknown event type.
+// The 1st icon is for checkmark
+// The 2nd icon is for crossmark
+// The 3rd icon is for audio event
+// The 4th icon is for vibrate event
+// The 5th icon is for unknown event
+RESOURCE ARRAY r_event_type_array
+{
+	items=
+	{	
+		LBUF { txt="Wiedergabe Audio;0"; },
+		LBUF { txt="Vibrieren;1"; }
+	};	
+}
+
+// Number 4 cannot be used.
+//
+// The numbers in this array are the actual numbers that are stored in the database. However,
+// for indexing into the icon array, they are a continuation of the above list.
+//
+// The 6th icon is for enter trigger
+// The 7th icon is for leave trigger
+// The 8th icon is for both trigger
+RESOURCE ARRAY r_event_type_trigger
+{
+	items=
+	{	
+		LBUF { txt="Eingabe;0"; },
+		LBUF { txt="Verlasse;1"; },
+		LBUF { txt="Beides;2"; }
+	};	
+}
+
+// Dialog to select type of event to create
+RESOURCE DIALOG r_dialog_event_type_selection
+{
+	title = "Spezielles Ereignis";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Typ:";
+			id = cChoiceList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			prompt = "Nachfolgend:";
+			id = cString;
+			control = GTXTED
+			{ 
+				height = 55; width = 150; numlines = 1; textlimit = 50; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtCheckBox;
+			prompt = "Aktiv:";
+			id = cCheckBox;
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Auslöser:";
+			id = cTriggerList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array;
+			};
+		},		
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Gruppe:";
+			id = cCellGroups;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array;
+			};
+		}
+	};
+}
+
+// Dialog to create new audio event
+RESOURCE DIALOG r_dialog_event_audio
+{
+	title = "Ereignis - Audio";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Audio:";
+			id = cChoiceList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_array_audionotify;
+			};
+		}
+	};
+}
+
+// Dialog to edit audio event
+RESOURCE DIALOG r_dialog_event_edit_audio
+{
+	title = "Ereignis - Audio";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			prompt = "Nachfolgend:";
+			id = cString;
+			control = GTXTED
+			{ 
+				height = 55; width = 150; numlines = 1; textlimit = 50; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Auslöser:";
+			id = cTriggerList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Audio:";
+			id = cChoiceList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_array_audionotify;
+			};
+		}
+	};
+}
+
+// Dialog to edit vibration event
+RESOURCE DIALOG r_dialog_event_edit_vibrate
+{
+	title = "Ereignis - Vibrieren";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			prompt = "Nachfolgend:";
+			id = cString;
+			control = GTXTED
+			{ 
+				height = 55; width = 150; numlines = 1; textlimit = 50; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd;
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Auslöser:";
+			id = cTriggerList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_event_type_trigger;
+			};
+		}
+	};
+}
+
+/*
+// Generic dialog to prompt for drive letter (RAM only)
+RESOURCE DIALOG r_dialog_prompt_drive_letter
+{
+	title = "Wähle Laufwerk";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Laufwerk:";
+			id = cChoiceList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_empty_array;
+			};
+		}
+	};
+}
+*/
+
+/*
+// List files to import
+RESOURCE DIALOG r_edit_cells_dialog_import
+{
+	title = "Wähle Datei";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtListBox;
+			prompt = "Import:";
+			id = cCellDBImportExportFileListBox;
+			control = LISTBOX 
+			{ 
+				array_id = r_empty_array;
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+			};
+		}
+	};
+}
+*/
+
+RESOURCE DIALOG r_dialog_cells_importexport_progress
+{
+	title = "Fortschritt";
+	buttons = R_EIK_BUTTONS_OK;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			prompt = "Aktuell:";
+			id = cString;
+			control = GTXTED
+			{ 
+				height = 100; width = 150; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd | EEikEdwinReadOnly;
+			};
+		},
+		DLG_LINE
+		{
+			prompt = "Fortschritt:";
+			type = EEikCtProgInfo;
+			id = cProgressInfo;
+			control = PROGRESSINFO
+			{
+				text_type = EEikProgressTextPercentage;
+			};
+		}
+	};
+}
+
+// Debug dialog to fool sman into thinking it is running on a particular phone model
+#ifdef __DEBUG_BUILD__
+RESOURCE DIALOG r_dialog_debug
+{
+	title = "Wähle Telefon";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Telefon:";
+			id = cChoiceList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_phone_model_array;
+			};
+		}
+	};
+}
+#endif
+
+// For debug menu
+#ifdef __DEBUG_BUILD__
+RESOURCE ARRAY r_phone_model_array
+{
+	items=
+	{	
+		LBUF { txt="SonyEricsson P800"; },
+		LBUF { txt="SonyEricsson P900"; },
+		LBUF { txt="Motorola A920"; },
+		LBUF { txt="Motorola A925"; },
+		LBUF { txt="<Unbekannt>"; }
+	};	
+}
+#endif
+
+RESOURCE DLG_BUTTONS r_buttons_bluejack_exclusionlist
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidAdd; button = CMBUT { txt = "Hinzufügen"; }; },
+		DLG_BUTTON { id = EEikBidDel; button = CMBUT { txt = "Löschen"; }; },
+		DLG_BUTTON { id = EEikBidEdit; button = CMBUT { txt = "Ändern"; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "Ok"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+// Edit bluejack exclusion list
+// List files to import
+RESOURCE DIALOG r_edit_bluejack_exclusionlist
+{
+	title = "BT Geräte";
+	buttons = r_buttons_bluejack_exclusionlist;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtColListBox;
+			id = cListBox;
+			control = LISTBOX 
+			{ 
+				array_id = r_empty_array;
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				height = 6;
+			};
+		}
+	};
+}
+
+// Edit bt exclusion list device
+RESOURCE DIALOG r_dialog_bluejack_editdevice
+{
+	title = "Ändere Eintrag";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cString;
+			control = GTXTED 
+			{ 
+				height = 55; width = 150; numlines = 1; textlimit = 255; flags = EEikEdwinNoHorizScrolling | EEikEdwinJustAutoCurEnd;
+			};
+		}
+	};
+}
+
+RESOURCE ARRAY r_maxtodopriority_array
+{
+	items=
+	{	
+		LBUF { txt="Alle"; },
+		LBUF { txt="1"; },
+		LBUF { txt="2"; },
+		LBUF { txt="3"; },
+		LBUF { txt="4"; },
+		LBUF { txt="5"; },
+		LBUF { txt="6"; },
+		LBUF { txt="7"; },
+		LBUF { txt="8"; },
+		LBUF { txt="9"; }
+	};	
+}
+
+// Set max todo priority to display in today view
+RESOURCE DIALOG r_dialog_agenda_maxtodopriority
+{
+	title = "Prioritäts Filter";
+	buttons = r_buttons_ok_cancel;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtChoiceList;
+			prompt = "Priorität:";
+			id = cChoiceList;
+			control = CHOICELIST 
+			{ 
+				array_id = r_maxtodopriority_array;
+			};
+		}
+	};
+}
+
+/*
+RESOURCE DIALOG r_dialog_folder_selector
+{
+	title = "Wähle Verzeichnis";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items =
+	{
+		DLG_LINE
+		{
+			type = EEikCtFolderNameSel;
+			prompt = "Verzeichnis:";
+			id = cFolderSelector;
+			control = FILENAMESELECTOR 
+			{ 
+			};
+		},
+		DLG_LINE
+		{
+			type = EEikCtDriveNameSel;
+			prompt = "Laufwerk:";
+			id = cDriveSelector;
+			control = DRIVENAMESELECTOR 
+			{ 
+			};
+		}
+	};
+}
+*/
+
+RESOURCE DIALOG r_dialog_cellarea_event_firing_delay
+{
+	title = "Ereignis Verzögerung";
+	buttons = r_buttons_bluebeamlog;
+	flags = EEikDialogFlagWait;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EQikCtNumberEditor;
+			prompt = "Verzögerung (Min):";
+			id = cNumberEditor;
+			control = QIK_NUMBER_EDITOR { min = 0; max = 60; };
+		}
+	};
+}
+
+RESOURCE DLG_BUTTONS r_buttons_folder_file_browser
+{
+	buttons =
+	{
+		DLG_BUTTON { id = EEikBidSelectAll; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderAll; bmpmask = EMbmMyheaderAllmask; }; },
+		DLG_BUTTON { id = EEikBidSelectNone; button = CMBUT { bmpfile = "*"; bmpid = EMbmMyheaderNone; bmpmask = EMbmMyheaderNonemask; }; },
+		DLG_BUTTON { id = EEikBidOk; button = CMBUT { txt = "Abbrechen"; }; },
+		DLG_BUTTON { id = EEikBidYes; button = CMBUT { txt = "Ok"; }; flags=EEikLabeledButtonIsDefault; }
+	};
+}
+
+RESOURCE DIALOG r_dialog_folder_file_browser
+{
+	title = "Wähle Verzeichnis";
+	buttons = r_buttons_folder_file_browser;
+	flags = EEikDialogFlagWait;
+	items=
+	{
+		DLG_LINE
+		{
+			type = EEikTextListBoxWithPointerHandler;
+			id = cListBox;
+			control = LISTBOX
+			{
+				array_id = r_empty_array;
+				flags = EEikListBoxMultipleSelection | EEikListBoxNoExtendedSelection;
+				height = 6;
+			};
+		}
+	};
+}
+
+RESOURCE TBUF r_tbuf_unknownphonemessage { buf = "SMan has detected that it is running on a \
+phone it does not recognize. Please send the following information to*\
+- ajack (ajack2001my@yahoo.com); or*\
+- drollercoaster (drollercoaster@hotmail.com):**\
+1. Machine UID*\
+2. Manufacturer UID**\
+You can obtain this information from the SysInfo module in SMan.**\
+Thank you."; }
+
+RESOURCE DIALOG r_dialog_unknownphonedialog
+{
+	title = "Information";
+	buttons = R_EIK_BUTTONS_DONE;
+	flags = EEikDialogFlagWait;
+	items = 
+	{
+		DLG_LINE
+		{
+			type = EEikCtGlobalTextEditor;
+			id = cCreditsText;
+			control = GTXTED
+			{ 
+				width = 150; height = 150; numlines = 20; flags = EEikEdwinReadOnly | EEikEdwinNoAutoSelection | EEikEdwinDisplayOnly;
+			};
+		}
+	};
+}
